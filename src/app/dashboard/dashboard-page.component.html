@@ -1,0 +1,55 @@
+<main class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand__mark">PC</div>
+      <div>
+        <p>PetClinic</p>
+        <strong>Admin dashboard</strong>
+      </div>
+    </div>
+
+    <nav class="nav-list" aria-label="Dashboard sections">
+      @for (item of navItems; track item.path) {
+        <a
+          class="nav-item"
+          [routerLink]="['/dashboard', item.path]"
+          routerLinkActive="nav-item--active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <span class="nav-item__main">
+            <ng-icon [name]="item.icon" class="nav-item__icon" aria-hidden="true"></ng-icon>
+            <span class="nav-item__label">{{ item.label }}</span>
+          </span>
+          <!--<small>{{ item.hint }}</small>-->
+        </a>
+      }
+    </nav>
+
+    <section class="sidebar-card">
+      <span>Shift status</span>
+      <strong>Front desk ready</strong>
+      <p>All morning appointments are synced and waiting for check-in.</p>
+    </section>
+
+    <button type="button" class="sidebar-logout" (click)="logout()">Logout</button>
+  </aside>
+
+  <section class="dashboard-main">
+    <!--<header class="topbar">
+      <div>
+        <p class="eyebrow">PetClinic control center</p>
+        <h1>Welcome</h1>
+        <p class="subtext">Logged in as {{ currentRole }}.</p>
+      </div>
+
+      <div class="topbar-actions">
+        <button type="button">Export</button>
+        <button type="button" class="topbar-actions__primary">New reservation</button>
+      </div>
+    </header>-->
+
+    <section class="shell-frame">
+      <router-outlet></router-outlet>
+    </section>
+  </section>
+</main>

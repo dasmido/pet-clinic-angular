@@ -1,0 +1,218 @@
+<section class="feature-page">
+  <header class="feature-page__hero">
+    <div>
+      <p class="feature-page__eyebrow">Chronic Diseases</p>
+      <h2>Disease management</h2>
+      <p>Track and manage chronic disease records across the patient population.</p>
+    </div>
+    <button type="button" class="feature-page__action" (click)="openAddDialog()">Add new disease</button>
+  </header>
+
+  <section class="feature-page__metrics">
+    @for (metric of metrics; track metric.label) {
+      <article class="feature-page__metric">
+        <span>{{ metric.label }}</span>
+        <strong>{{ metric.value }}</strong>
+        <small>{{ metric.delta }}</small>
+      </article>
+    }
+  </section>
+
+  <article class="feature-page__panel">
+    <div class="feature-page__panel-header">
+      <div>
+        <p>Chronic Diseases</p>
+        <h3>Disease registry</h3>
+      </div>
+      <span>Manage patient disease records and treatment history.</span>
+    </div>
+
+    <div class="diseases-toolbar">
+      <div class="diseases-toolbar__search">
+        <label for="disease-search">Search diseases</label>
+        <input
+          id="disease-search"
+          type="text"
+          placeholder="Disease name, description"
+          [(ngModel)]="filter.searchTerm"
+        />
+      </div>
+
+      <button type="button" class="secondary-button" (click)="openFilterDialog()">
+        Filter by patient
+      </button>
+    </div>
+
+    <div class="diseases-table-wrapper">
+      @if (isLoading) {
+        <div class="loading-state">Loading chronic diseases...</div>
+      } @else if (errorMessage) {
+        <div class="error-state">{{ errorMessage }}</div>
+      } @else {
+        <table class="diseases-table">
+          <thead>
+            <tr>
+              <th>Disease name</th>
+              <th>Description</th>
+              <th>Patient</th>
+              <th>Created at</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @if (filteredDiseases.length === 0) {
+              <tr>
+                <td colspan="5" class="diseases-table__empty">No chronic diseases found.</td>
+              </tr>
+            }
+
+            @for (disease of filteredDiseases; track disease.id) {
+              <tr>
+                <td><strong>{{ disease.diseaseName }}</strong></td>
+                <td>{{ disease.diseaseDescription || 'N/A' }}</td>
+                <td>{{ getPatientName(disease.patientId) }}</td>
+                <td>{{ disease.createdAt | date: 'dd MMM yyyy' }}</td>
+                <td>
+                  @if (deleteConfirmationId === disease.id) {
+                    <div class="delete-confirmation">
+                      <span>Confirm delete?</span>
+                      <button
+                        type="button"
+                        class="delete-button"
+                        (click)="deleteChronicDisease(disease.id)"
+                        [disabled]="isDeleting"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        type="button"
+                        class="secondary-button"
+                        (click)="cancelDelete()"
+                        [disabled]="isDeleting"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  } @else {
+                    <button
+                      type="button"
+                      class="delete-button"
+                      (click)="showDeleteConfirmation(disease.id)"
+                      aria-label="Delete disease record"
+                    >
+                      Delete
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="pagination-controls">
+      <button type="button" class="secondary-button" (click)="previousPage()" [disabled]="currentPage <= 1 || filter.patientId">
+        ← Previous
+      </button>
+      <span class="pagination-info">
+        @if (filter.patientId) {
+          {{ filteredDiseases.length }} disease records for this patient
+        } @else {
+          Page {{ currentPage }} of {{ totalPages }} ({{ totalDiseases }} total diseases)
+        }
+      </span>
+      <button type="button" class="secondary-button" (click)="nextPage()" [disabled]="currentPage >= totalPages || filter.patientId">
+        Next →
+      </button>
+    </div>
+  </article>
+
+  @if (isAddDialogOpen) {
+    <div class="dialog-overlay" (click)="closeAddDialog()">
+      <section class="dialog dialog--large" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Chronic Diseases</p>
+            <h3>Add new disease record</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeAddDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form" (ngSubmit)="createChronicDisease()">
+          <label>
+            <span>Patient</span>
+            <select [(ngModel)]="newDiseaseForm.patientId" name="patientId" required>
+              <option value="">Select a patient</option>
+              @for (patient of patients; track patient.id) {
+                <option [value]="patient.id">{{ patient.fullname }} ({{ patient.cardNo }})</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Disease name</span>
+            <input type="text" [(ngModel)]="newDiseaseForm.diseaseName" name="diseaseName" placeholder="e.g., Arthritis" required />
+          </label>
+
+          <label>
+            <span>Description</span>
+            <input
+              type="text"
+              [(ngModel)]="newDiseaseForm.diseaseDescription"
+              name="diseaseDescription"
+              placeholder="e.g., Mild, Severe, etc."
+            />
+          </label>
+
+          @if (errorMessage) {
+            <div class="form-error">{{ errorMessage }}</div>
+          }
+
+          <div class="dialog__actions">
+            <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
+            <button type="submit" class="feature-page__action" [disabled]="isCreating">
+              {{ isCreating ? 'Creating...' : 'Create disease' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (isFilterDialogOpen) {
+    <div class="dialog-overlay" (click)="closeFilterDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Chronic Diseases</p>
+            <h3>Filter by patient</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeFilterDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form" (ngSubmit)="applyFilter()">
+          <label>
+            <span>Select patient</span>
+            <select [(ngModel)]="filter.patientId" name="filterPatientId">
+              <option value="">All patients</option>
+              @for (patient of patients; track patient.id) {
+                <option [value]="patient.id">{{ patient.fullname }} ({{ patient.cardNo }})</option>
+              }
+            </select>
+          </label>
+
+          <div class="dialog__actions">
+            <button type="button" class="secondary-button" (click)="clearFilter()">Clear filter</button>
+            <button type="submit" class="feature-page__action">Apply filter</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+</section>

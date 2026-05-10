@@ -1,0 +1,130 @@
+<main class="auth-page auth-page--register">
+  <section class="auth-shell">
+    <aside class="auth-intro">
+      <p class="eyebrow">Create a staff account</p>
+      <h1>Register users with a crisp, guided form.</h1>
+      <p class="lead">
+        Capture the exact payload your backend expects, with validation and a more polished admin-facing workflow.
+      </p>
+
+      <div class="feature-grid feature-grid--accent">
+        <article>
+          <span>Profile</span>
+          <strong>Full name and phone included</strong>
+        </article>
+        <article>
+          <span>Access</span>
+          <strong>Role-aware account creation</strong>
+        </article>
+        <article>
+          <span>API ready</span>
+          <strong>Posts to /auth/register</strong>
+        </article>
+        <article>
+          <span>Fast follow-up</span>
+          <strong>Redirects back to login</strong>
+        </article>
+      </div>
+    </aside>
+
+    <section class="auth-card auth-card--register">
+      <div class="auth-card__header">
+        <span class="auth-badge auth-badge--register">Register</span>
+        <h2>Build a new account</h2>
+        <p>Every field maps directly to the request body your API expects.</p>
+      </div>
+
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <label>
+          <span>Username</span>
+          <input type="text" formControlName="username" placeholder="dede" autocomplete="username" />
+        </label>
+        @if (usernameControl.touched && usernameControl.hasError('required')) {
+          <p class="field-error">Username is required.</p>
+        }
+        @if (usernameControl.touched && usernameControl.hasError('minlength')) {
+          <p class="field-error">Username must be at least 3 characters.</p>
+        }
+
+        <label>
+          <span>Password</span>
+          <input type="password" formControlName="password" placeholder="Choose a secure password" autocomplete="new-password" />
+        </label>
+        @if (passwordControl.touched && passwordControl.hasError('required')) {
+          <p class="field-error">Password is required.</p>
+        }
+        @if (passwordControl.touched && passwordControl.hasError('minlength')) {
+          <p class="field-error">Password must be at least 6 characters.</p>
+        }
+
+        <label>
+          <span>Full name</span>
+          <input type="text" formControlName="fullname" placeholder="Mohammed1" autocomplete="name" />
+        </label>
+        @if (fullnameControl.touched && fullnameControl.hasError('required')) {
+          <p class="field-error">Full name is required.</p>
+        }
+
+        <label>
+          <span>Phone</span>
+          <input type="tel" formControlName="phone" placeholder="0036301236543" autocomplete="tel" />
+        </label>
+        @if (phoneControl.touched && phoneControl.hasError('required')) {
+          <p class="field-error">Phone is required.</p>
+        }
+        @if (phoneControl.touched && phoneControl.hasError('pattern')) {
+          <p class="field-error">Enter a valid phone number.</p>
+        }
+
+        <label>
+          <span>Role</span>
+          <select formControlName="role">
+            @for (role of roles; track role) {
+              <option [value]="role">{{ role }}</option>
+            }
+          </select>
+        </label>
+        @if (roleControl.touched && roleControl.hasError('required')) {
+          <p class="field-error">Role is required.</p>
+        }
+
+        <button class="submit-button submit-button--register" type="submit" [disabled]="loading">
+          @if (loading) {
+            <span>Creating account...</span>
+          } @else {
+            <span>Create account</span>
+          }
+        </button>
+      </form>
+
+      @if (successMessage) {
+        <div class="status-panel status-panel--success">
+          <strong>Success</strong>
+          <p>{{ successMessage }}</p>
+        </div>
+      }
+
+      @if (errorMessage) {
+        <div class="status-panel status-panel--error">
+          <strong>Request failed</strong>
+          <p>{{ errorMessage }}</p>
+        </div>
+      }
+
+      @if (responseText) {
+        <div class="response-panel">
+          <div class="response-panel__header">
+            <strong>API response</strong>
+            <span>Returned by /register</span>
+          </div>
+          <pre>{{ responseText }}</pre>
+        </div>
+      }
+
+      <p class="auth-footer">
+        Already have an account?
+        <a routerLink="/login">Go to login</a>
+      </p>
+    </section>
+  </section>
+</main>

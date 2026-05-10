@@ -1,0 +1,94 @@
+<section class="profile-page">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading your profile...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <div class="error-container">
+      <p>{{ error() }}</p>
+    </div>
+  }
+
+  <!-- Profile Content -->
+  @if (!isLoading() && userProfile() && !error()) {
+    <div class="profile-content">
+      <!-- Hero Section with Profile Card -->
+      <div class="profile-hero">
+        <div class="profile-card">
+          <div class="avatar">
+            {{ initials }}
+          </div>
+          <div class="profile-info">
+            <h1>{{ userProfile()!.fullname }}</h1>
+            <p class="username">@{{ userProfile()!.username }}</p>
+          </div>
+        </div>
+        <div class="status-indicator">
+          <div class="role-badge">{{ userProfile()!.roles }}</div>
+
+        </div>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="profile-grid">
+        <!-- Personal Information -->
+        <section class="profile-section">
+          <div class="section-header">
+            <h2>Personal Information</h2>
+            <p class="section-description">Your account details</p>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Full Name</label>
+              <p>{{ userProfile()!.fullname }}</p>
+            </div>
+            <div class="info-item">
+              <label>Username</label>
+              <p>{{ userProfile()!.username }}</p>
+            </div>
+            <div class="info-item">
+              <label>Phone</label>
+              <p>{{ userProfile()!.phone }}</p>
+            </div>
+            <div class="info-item">
+              <label>Role</label>
+              <p>{{ userProfile()!.roles }}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Account Details -->
+        <section class="profile-section">
+          <div class="section-header">
+            <h2>Account Details</h2>
+            <p class="section-description">Account status and timestamps</p>
+          </div>
+          <div class="info-grid">
+            <div class="info-item full-width">
+              <label>Account ID</label>
+              <p class="mono">{{ userProfile()!.id }}</p>
+            </div>
+            <div class="info-item">
+              <label>Status</label>
+              <p>
+                <span class="status-badge" [class.active]="userProfile()!.isActive">
+                  {{ userProfile()!.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </p>
+            </div>
+            <div class="info-item">
+              <label>Member Since</label>
+              <p>{{ formatDate(userProfile()!.createdAt) }}</p>
+            </div>
+
+          </div>
+        </section>
+      </div>
+    </div>
+  }
+</section>

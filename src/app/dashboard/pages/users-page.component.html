@@ -1,0 +1,42 @@
+<section class="feature-page">
+  <header class="feature-page__hero">
+    <div>
+      <p class="feature-page__eyebrow">Users</p>
+      <h2>Team access</h2>
+      <p>Manage staff accounts, onboarding states, and role assignment for PetClinic.</p>
+    </div>
+    <button type="button" class="feature-page__action">Invite user</button>
+  </header>
+
+  <section class="feature-page__metrics">
+    @for (metric of metrics; track metric.label) {
+      <article class="feature-page__metric">
+        <span>{{ metric.label }}</span>
+        <strong>{{ metric.value }}</strong>
+        <small>{{ metric.delta }}</small>
+      </article>
+    }
+  </section>
+
+  <article class="feature-page__panel">
+    <div class="feature-page__panel-header">
+      <div>
+        <p>Users</p>
+        <h3>Access roster</h3>
+      </div>
+      <span>Keep permissions aligned with daily clinic operations.</span>
+    </div>
+
+    <div class="feature-page__list">
+      @for (record of records; track record.heading) {
+        <div class="feature-page__item">
+          <div>
+            <strong>{{ record.heading }}</strong>
+            <span>{{ record.subheading }}</span>
+          </div>
+          <small>{{ record.status }}</small>
+        </div>
+      }
+    </div>
+  </article>
+</section>

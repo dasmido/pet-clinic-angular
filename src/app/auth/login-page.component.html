@@ -1,0 +1,99 @@
+<main class="auth-page auth-page--login">
+  <section class="auth-shell">
+    <aside class="auth-intro">
+      <p class="eyebrow">PetClinic Platform</p>
+      <h1>All-in-One Clinic Management Solution</h1>
+      <p class="lead">
+        Effortlessly manage appointments, patient records, and cash flow with a powerful, modern platform designed for veterinary professionals.
+      </p>
+
+      <div class="feature-grid">
+        <article>
+          <span>Seamless</span>
+          <strong>Appointment Scheduling</strong>
+        </article>
+        <article>
+          <span>Detailed</span>
+          <strong>Pet Patient Records</strong>
+        </article>
+        <article>
+          <span>Simplified</span>
+          <strong>Cashbox Management</strong>
+        </article>
+        <article>
+          <span>Collaborative</span>
+          <strong>Team Workflow Tools</strong>
+        </article>
+      </div>
+    </aside>
+
+    <section class="auth-card">
+      <div class="auth-card__header">
+        <span class="auth-badge">Login</span>
+        <h2>Welcome!</h2>
+        <p>Sign in to manage your clinic.</p>
+      </div>
+
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <label>
+          <span>Username</span>
+          <input type="text" formControlName="username" placeholder="dede" autocomplete="username" />
+        </label>
+        @if (usernameControl.touched && usernameControl.hasError('required')) {
+          <p class="field-error">Username is required.</p>
+        }
+        @if (usernameControl.touched && usernameControl.hasError('minlength')) {
+          <p class="field-error">Username must be at least 3 characters.</p>
+        }
+
+        <label>
+          <span>Password</span>
+          <input type="password" formControlName="password" placeholder="Enter your password" autocomplete="current-password" />
+        </label>
+        @if (passwordControl.touched && passwordControl.hasError('required')) {
+          <p class="field-error">Password is required.</p>
+        }
+        @if (passwordControl.touched && passwordControl.hasError('minlength')) {
+          <p class="field-error">Password must be at least 6 characters.</p>
+        }
+
+        <button class="submit-button" type="submit" [disabled]="loading">
+          @if (loading) {
+            <span>Signing in...</span>
+          } @else {
+            <span>Sign in</span>
+          }
+        </button>
+      </form>
+
+      @if (successMessage) {
+        <div class="status-panel status-panel--success">
+          <strong>Success</strong>
+          <p>{{ successMessage }}</p>
+        </div>
+      }
+
+      @if (errorMessage) {
+        <div class="status-panel status-panel--error">
+          <strong>Request failed</strong>
+          <p>{{ errorMessage }}</p>
+        </div>
+      }
+
+      @if (responseText) {
+        <div class="response-panel">
+          <div class="response-panel__header">
+            <strong>API response</strong>
+            <span>Returned by /login</span>
+          </div>
+          <pre>{{ responseText }}</pre>
+        </div>
+      }
+
+      <p class="auth-footer">
+        New to PetClinic?
+        <a routerLink="/register">Start your free trial</a>
+      </p>
+    </section>
+  </section>
+</main>

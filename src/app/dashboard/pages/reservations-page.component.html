@@ -1,0 +1,42 @@
+<section class="feature-page">
+  <header class="feature-page__hero">
+    <div>
+      <p class="feature-page__eyebrow">Reservations</p>
+      <h2>Appointment board</h2>
+      <p>Schedule consults, follow-ups, and walk-in visits with clear daily visibility.</p>
+    </div>
+    <button type="button" class="feature-page__action">New reservation</button>
+  </header>
+
+  <section class="feature-page__metrics">
+    @for (metric of metrics; track metric.label) {
+      <article class="feature-page__metric">
+        <span>{{ metric.label }}</span>
+        <strong>{{ metric.value }}</strong>
+        <small>{{ metric.delta }}</small>
+      </article>
+    }
+  </section>
+
+  <article class="feature-page__panel">
+    <div class="feature-page__panel-header">
+      <div>
+        <p>Reservations</p>
+        <h3>Today schedule</h3>
+      </div>
+      <span>Balance doctor capacity with high-priority bookings.</span>
+    </div>
+
+    <div class="feature-page__list">
+      @for (record of records; track record.heading) {
+        <div class="feature-page__item">
+          <div>
+            <strong>{{ record.heading }}</strong>
+            <span>{{ record.subheading }}</span>
+          </div>
+          <small>{{ record.status }}</small>
+        </div>
+      }
+    </div>
+  </article>
+</section>

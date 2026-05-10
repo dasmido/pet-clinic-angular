@@ -1,0 +1,350 @@
+<section class="feature-page">
+  <!--<header class="feature-page__hero">
+    <div>
+      <p class="feature-page__eyebrow">Patients</p>
+      <h2>Patient flow</h2>
+      <p>Track check-ins, treatment stages, and the current PetClinic queue.</p>
+    </div>
+    <button type="button" class="feature-page__action" (click)="openAddDialog()">Add new patient</button>
+  </header>
+
+  <section class="feature-page__metrics">
+    @for (metric of metrics; track metric.label) {
+      <article class="feature-page__metric">
+        <span>{{ metric.label }}</span>
+        <strong>{{ metric.value }}</strong>
+        <small>{{ metric.delta }}</small>
+      </article>
+    }
+  </section>-->
+
+  <article class="feature-page__panel">
+    <div class="feature-page__panel-header">
+      <div>
+        <p>Patients</p>
+        <h3>Patient registry</h3>
+      </div>
+      <span>Keep critical cases at the top of the morning intake.</span>
+    </div>
+
+    <div class="patients-toolbar">
+      <div class="patients-toolbar__search">
+        <label for="patient-quick-search">Quick search</label>
+        <input
+          id="patient-quick-search"
+          type="text"
+          placeholder="Name, card number, phone"
+          [(ngModel)]="quickSearch"
+        />
+      </div>
+
+      <div class="patients-toolbar__actions">
+        <button type="button" class="secondary-button" (click)="openAdvancedSearchDialog()">
+          Advanced search
+        </button>
+        <button type="button" class="secondary-button" (click)="openAddDialog()">Add new patient</button>
+      </div>
+
+    </div>
+
+    <div class="patients-table-wrapper">
+      @if (isLoading) {
+        <div class="loading-state">Loading patients...</div>
+      } @else if (errorMessage) {
+        <div class="error-state">{{ errorMessage }}</div>
+      } @else {
+        <table class="patients-table">
+          <thead>
+            <tr>
+              <th>Card No</th>
+              <th>Full name</th>
+              <th>Birth Date</th>
+              <th>Gender</th>
+              <th>Marital Status</th>
+              <th>Emergency Phone</th>
+              <th>Allergies</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @if (filteredPatients.length === 0) {
+              <tr>
+                <td colspan="8" class="patients-table__empty">No patients found for the selected search filters.</td>
+              </tr>
+            }
+
+            @for (patient of filteredPatients; track patient.id) {
+              <tr>
+                <td>{{ patient.cardNo }}</td>
+                <td>{{ patient.fullname }}</td>
+                <td>{{ patient.birthDate | date: 'dd MMM yyyy' }}</td>
+                <td>{{ patient.gender }}</td>
+                <td>{{ patient.maritalStatus }}</td>
+                <td>{{ patient.emergencyPhone || 'N/A' }}</td>
+                <td>{{ patient.allergies || 'None' }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="icon-button"
+                    (click)="openDetailsDialog(patient)"
+                    aria-label="Open patient details"
+                  >
+                    Details &#8599;
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="pagination-controls">
+      <button type="button" class="secondary-button" (click)="previousPage()" [disabled]="currentPage <= 1">
+        ← Previous
+      </button>
+      <span class="pagination-info">
+        Page {{ currentPage }} of {{ totalPages }} ({{ totalPatients }} total patients)
+      </span>
+      <button type="button" class="secondary-button" (click)="nextPage()" [disabled]="currentPage >= totalPages">
+        Next →
+      </button>
+    </div>
+  </article>
+
+  @if (isAdvancedSearchOpen) {
+    <div class="dialog-overlay" (click)="closeAdvancedSearchDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Patients</p>
+            <h3>Advanced search</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeAdvancedSearchDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form" (ngSubmit)="applyAdvancedSearch()">
+          <label>
+            <span>Full name</span>
+            <input type="text" [(ngModel)]="searchCriteria.fullname" name="searchFullname" />
+          </label>
+
+          <label>
+            <span>Card number</span>
+            <input type="text" [(ngModel)]="searchCriteria.cardNo" name="searchCardNo" />
+          </label>
+
+          <label>
+            <span>Gender</span>
+            <select [(ngModel)]="searchCriteria.gender" name="searchGender">
+              <option value="">Any</option>
+              <option value="MALE">MALE</option>
+              <option value="FEMALE">FEMALE</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Marital status</span>
+            <select [(ngModel)]="searchCriteria.maritalStatus" name="searchMaritalStatus">
+              <option value="">Any</option>
+              <option value="SINGLE">SINGLE</option>
+              <option value="MARRIED">MARRIED</option>
+              <option value="DIVORCED">DIVORCED</option>
+              <option value="WIDOWED">WIDOWED</option>
+            </select>
+          </label>
+
+          <div class="dialog__actions">
+            <button type="button" class="secondary-button" (click)="clearAdvancedSearch()">Clear filters</button>
+            <button type="submit" class="feature-page__action">Apply search</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (isAddDialogOpen) {
+    <div class="dialog-overlay" (click)="closeAddDialog()">
+      <section class="dialog dialog--large" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Patients</p>
+            <h3>Add new patient</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeAddDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form dialog__form--two-columns" (ngSubmit)="createPatient()">
+          <label>
+            <span>Card number</span>
+            <input type="text" [(ngModel)]="newPatientForm.cardNo" name="newCardNo" required />
+          </label>
+
+          <label>
+            <span>Full name</span>
+            <input type="text" [(ngModel)]="newPatientForm.fullname" name="newFullname" required />
+          </label>
+
+          <label>
+            <span>Birth date</span>
+            <input type="date" [(ngModel)]="newPatientForm.birthDate" name="newBirthDate" />
+          </label>
+
+          <label>
+            <span>Gender</span>
+            <select [(ngModel)]="newPatientForm.gender" name="newGender">
+              <option value="MALE">MALE</option>
+              <option value="FEMALE">FEMALE</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Marital status</span>
+            <select [(ngModel)]="newPatientForm.maritalStatus" name="newMaritalStatus">
+              <option value="SINGLE">SINGLE</option>
+              <option value="MARRIED">MARRIED</option>
+              <option value="DIVORCED">DIVORCED</option>
+              <option value="WIDOWED">WIDOWED</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Emergency contact</span>
+            <input type="text" [(ngModel)]="newPatientForm.emergencyContact" name="newEmergencyContact" />
+          </label>
+
+          <label>
+            <span>Emergency phone</span>
+            <input type="text" [(ngModel)]="newPatientForm.emergencyPhone" name="newEmergencyPhone" />
+          </label>
+
+          <label>
+            <span>Emergency relation</span>
+            <input type="text" [(ngModel)]="newPatientForm.emergencyRelation" name="newEmergencyRelation" />
+          </label>
+
+          <label class="dialog__field--full">
+            <span>Allergies</span>
+            <input type="text" [(ngModel)]="newPatientForm.allergies" name="newAllergies" />
+          </label>
+
+          <section class="dialog__field--full add-chronic">
+            <header class="add-chronic__header">
+              <div>
+                <p>Chronic diseases</p>
+                <small>Add one or more chronic conditions for this patient.</small>
+              </div>
+              <button type="button" class="secondary-button" (click)="addChronicDiseaseRow()">+ Add disease</button>
+            </header>
+
+            <div class="add-chronic__list">
+              @for (disease of newPatientChronicDiseases; track $index; let i = $index) {
+                <div class="add-chronic__row">
+                  <label>
+                    <span>Disease name</span>
+                    <input
+                      type="text"
+                      [(ngModel)]="disease.diseaseName"
+                      [name]="'newDiseaseName' + i"
+                      placeholder="e.g., Arthritis"
+                    />
+                  </label>
+
+                  <label>
+                    <span>Description</span>
+                    <input
+                      type="text"
+                      [(ngModel)]="disease.diseaseDescription"
+                      [name]="'newDiseaseDescription' + i"
+                      placeholder="e.g., Mild / controlled"
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    class="icon-button add-chronic__remove"
+                    (click)="removeChronicDiseaseRow(i)"
+                    [disabled]="newPatientChronicDiseases.length === 1"
+                  >
+                    Remove
+                  </button>
+                </div>
+              }
+            </div>
+          </section>
+
+          @if (errorMessage) {
+            <div class="dialog__field--full form-error">
+              {{ errorMessage }}
+            </div>
+          }
+
+          <div class="dialog__actions dialog__actions--full">
+            <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
+            <button type="submit" class="feature-page__action" [disabled]="isCreating">
+              {{ isCreating ? 'Creating...' : 'Create patient' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (isDetailsDialogOpen && selectedPatient) {
+    <div class="dialog-overlay" (click)="closeDetailsDialog()">
+      <section class="dialog dialog--details" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Patient details</p>
+            <h3>{{ selectedPatient.fullname }}</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeDetailsDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <dl class="details-grid">
+          <dt>Card number</dt><dd>{{ selectedPatient.cardNo }}</dd>
+          <dt>Birth date</dt><dd>{{ selectedPatient.birthDate | date: 'dd MMM yyyy' }}</dd>
+          <dt>Gender</dt><dd>{{ selectedPatient.gender }}</dd>
+          <dt>Marital status</dt><dd>{{ selectedPatient.maritalStatus }}</dd>
+          <dt>Emergency contact</dt><dd>{{ selectedPatient.emergencyContact || 'N/A' }}</dd>
+          <dt>Emergency phone</dt><dd>{{ selectedPatient.emergencyPhone || 'N/A' }}</dd>
+          <dt>Emergency relation</dt><dd>{{ selectedPatient.emergencyRelation || 'N/A' }}</dd>
+          <dt>Allergies</dt><dd>{{ selectedPatient.allergies || 'None' }}</dd>
+          <dt>Created at</dt><dd>{{ selectedPatient.createdAt | date: 'dd MMM yyyy, HH:mm' }}</dd>
+          <dt>Updated at</dt><dd>{{ selectedPatient.updatedAt | date: 'dd MMM yyyy, HH:mm' }}</dd>
+        </dl>
+
+        <section class="details-chronic">
+          <header class="details-chronic__header">
+            <p>Chronic diseases</p>
+            <small>{{ selectedPatientChronicDiseases.length }} records</small>
+          </header>
+
+          @if (isDetailsChronicLoading) {
+            <div class="details-chronic__state">Loading chronic diseases...</div>
+          } @else if (detailsChronicError) {
+            <div class="details-chronic__state details-chronic__state--error">{{ detailsChronicError }}</div>
+          } @else if (selectedPatientChronicDiseases.length === 0) {
+            <div class="details-chronic__state">No chronic diseases recorded for this patient.</div>
+          } @else {
+            <ul class="details-chronic__list">
+              @for (disease of selectedPatientChronicDiseases; track disease.id) {
+                <li class="details-chronic__item">
+                  <div class="details-chronic__name">{{ disease.diseaseName }}</div>
+                  <p>{{ disease.diseaseDescription || 'No description provided.' }}</p>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </section>
+    </div>
+  }
+</section>

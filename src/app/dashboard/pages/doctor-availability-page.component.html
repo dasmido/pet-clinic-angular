@@ -1,0 +1,42 @@
+<section class="feature-page">
+  <header class="feature-page__hero">
+    <div>
+      <p class="feature-page__eyebrow">Doctor Availability</p>
+      <h2>Availability and shifts</h2>
+      <p>See who is available, who is in surgery, and where the day needs support.</p>
+    </div>
+    <button type="button" class="feature-page__action">Update shifts</button>
+  </header>
+
+  <section class="feature-page__metrics">
+    @for (metric of metrics; track metric.label) {
+      <article class="feature-page__metric">
+        <span>{{ metric.label }}</span>
+        <strong>{{ metric.value }}</strong>
+        <small>{{ metric.delta }}</small>
+      </article>
+    }
+  </section>
+
+  <article class="feature-page__panel">
+    <div class="feature-page__panel-header">
+      <div>
+        <p>Doctor Availability</p>
+        <h3>Coverage map</h3>
+      </div>
+      <span>Use this page to keep the team balanced across rooms.</span>
+    </div>
+
+    <div class="feature-page__list">
+      @for (record of records; track record.heading) {
+        <div class="feature-page__item">
+          <div>
+            <strong>{{ record.heading }}</strong>
+            <span>{{ record.subheading }}</span>
+          </div>
+          <small>{{ record.status }}</small>
+        </div>
+      }
+    </div>
+  </article>
+</section>
