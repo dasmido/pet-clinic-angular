@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthStateService } from '../auth/auth-state.service';
@@ -43,6 +43,7 @@ interface SidebarNavItem {
 export class DashboardPageComponent {
   private readonly router = inject(Router);
   private readonly authState = inject(AuthStateService);
+  isSidebarOpen = false;
 
   get currentRole(): string {
     return this.authState.getRole() ?? 'SUPERADMIN';
@@ -52,7 +53,7 @@ export class DashboardPageComponent {
 
   readonly navItems: SidebarNavItem[] = [
     { icon: 'groups', label: 'Patients', path: 'patients', hint: 'Queue and records' },
-    { icon: 'medication', label: 'Chronic Diseases', path: 'chronic-diseases', hint: 'Disease management' },
+    // { icon: 'medication', label: 'Chronic Diseases', path: 'chronic-diseases', hint: 'Disease management' },
     { icon: 'event_available', label: 'Reservations', path: 'reservations', hint: 'Appointments' },
     { icon: 'coffee_maker', label: 'Doctor Availability', path: 'doctor-availability', hint: 'Availability' },
     { icon: 'manage_accounts', label: 'Users', path: 'users', hint: 'Staff access' },
@@ -60,7 +61,29 @@ export class DashboardPageComponent {
     { icon: 'account_circle', label: 'Profile', path: 'profile', hint: 'Admin account' },
   ];
 
+  @HostListener('window:resize')
+  onViewportResize(): void {
+    if (window.innerWidth > 920 && this.isSidebarOpen) {
+      this.isSidebarOpen = false;
+    }
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.isSidebarOpen = false;
+  }
+
+  closeSidebarOnMobile(): void {
+    if (window.innerWidth <= 920) {
+      this.isSidebarOpen = false;
+    }
+  }
+
   logout(): void {
+    this.closeSidebar();
     this.authState.clearSession();
     void this.router.navigate(['/login']);
   }

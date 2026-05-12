@@ -9,7 +9,8 @@
   background:
     radial-gradient(circle at top left, rgba(95, 191, 255, 0.22), transparent 34%),
     radial-gradient(circle at right center, rgba(70, 125, 255, 0.18), transparent 30%),
-    linear-gradient(160deg, #061120 0%, #0b1729 48%, #111f38 100%);
+    /*linear-gradient(160deg, #061120 0%, #0b1729 48%, #111f38 100%);*/
+    linear-gradient(160deg, #1e0631 0%, #1f0220 48%, #380448 100%);
   color: #f3f7ff;
 }
 
