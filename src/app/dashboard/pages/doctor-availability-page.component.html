@@ -3,12 +3,12 @@
     <div>
       <p class="feature-page__eyebrow">Doctor Availability</p>
       <h2>Availability and shifts</h2>
-      <p>See who is available, who is in surgery, and where the day needs support.</p>
+      <p>Manage reservation windows for each doctor and keep schedule coverage balanced.</p>
     </div>
-    <button type="button" class="feature-page__action">Update shifts</button>
+    <button type="button" class="feature-page__action" (click)="openAddDialog()">Add new availability</button>
   </header>
 
-  <section class="feature-page__metrics">
+  <!--<section class="feature-page__metrics">
     @for (metric of metrics; track metric.label) {
       <article class="feature-page__metric">
         <span>{{ metric.label }}</span>
@@ -16,27 +16,283 @@
         <small>{{ metric.delta }}</small>
       </article>
     }
-  </section>
+  </section>-->
 
   <article class="feature-page__panel">
-    <div class="feature-page__panel-header">
+    <!--<div class="feature-page__panel-header">
       <div>
         <p>Doctor Availability</p>
         <h3>Coverage map</h3>
       </div>
       <span>Use this page to keep the team balanced across rooms.</span>
+    </div>-->
+
+    <div class="availability-toolbar">
+      <div class="availability-toolbar__search">
+        <label for="availability-search">Quick search</label>
+        <input
+          id="availability-search"
+          type="text"
+          placeholder="Doctor ID, day, time"
+          [(ngModel)]="quickSearch"
+        />
+      </div>
+
+      <div class="availability-toolbar__actions">
+        <button type="button" class="secondary-button" (click)="loadAvailability()">Refresh</button>
+        <button type="button" class="secondary-button" (click)="openAddDialog()">Add new availability</button>
+      </div>
     </div>
 
-    <div class="feature-page__list">
-      @for (record of records; track record.heading) {
-        <div class="feature-page__item">
-          <div>
-            <strong>{{ record.heading }}</strong>
-            <span>{{ record.subheading }}</span>
-          </div>
-          <small>{{ record.status }}</small>
+    <div class="availability-table-wrapper">
+      @if (isLoading) {
+        <div class="loading-state">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <span>Loading availability...</span>
         </div>
+      } @else if (errorMessage && availabilities.length === 0) {
+        <div class="error-state">{{ errorMessage }}</div>
+      } @else {
+        <table class="availability-table">
+          <thead>
+            <tr>
+              <th>Doctor ID</th>
+              <th>Reservation Days</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @if (filteredAvailabilities.length === 0) {
+              <tr>
+                <td colspan="6" class="availability-table__empty">No availability records found for this search.</td>
+              </tr>
+            }
+
+            @for (record of filteredAvailabilities; track record.id) {
+              <tr>
+                <td><span class="doctor-id">{{ record.userId }}</span></td>
+                <td>
+                  <div class="day-chips">
+                    @for (day of record.reservationDays; track day) {
+                      <span class="day-chip">{{ day }}</span>
+                    }
+                  </div>
+                </td>
+                <td>{{ record.startTime.slice(0, 5) }}</td>
+                <td>{{ record.endTime.slice(0, 5) }}</td>
+                <!--<td>{{ record.createdAt | date: 'dd MMM yyyy, HH:mm' }}</td>-->
+                <td>
+                  <button type="button" class="icon-button details-button" (click)="openDetailsDialog(record)">
+                    Details &#8599;
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       }
     </div>
+
+    <div class="pagination-controls">
+      <button type="button" class="secondary-button" (click)="previousPage()" [disabled]="currentPage <= 1">
+        ← Previous
+      </button>
+      <span class="pagination-info">
+        Page {{ currentPage }} of {{ totalPages }} ({{ totalAvailability }} total records)
+      </span>
+      <button type="button" class="secondary-button" (click)="nextPage()" [disabled]="currentPage >= totalPages">
+        Next →
+      </button>
+    </div>
+
+    @if (errorMessage && availabilities.length > 0) {
+      <div class="inline-error">{{ errorMessage }}</div>
+    }
   </article>
+
+  @if (isAddDialogOpen) {
+    <div class="dialog-overlay" (click)="closeAddDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Doctor Availability</p>
+            <h3>Create availability</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeAddDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form" (ngSubmit)="createAvailability()">
+          <label>
+            <span>Doctor User ID</span>
+            <input type="text" [(ngModel)]="createForm.userId" name="newUserId" placeholder="UUID" required />
+          </label>
+
+          <label>
+            <span>Start Time</span>
+            <input type="time" [(ngModel)]="createForm.startTime" name="newStartTime" required />
+          </label>
+
+          <label>
+            <span>End Time</span>
+            <input type="time" [(ngModel)]="createForm.endTime" name="newEndTime" required />
+          </label>
+
+          <section class="day-picker">
+            <p>Reservation days</p>
+            <div class="day-picker__grid">
+              @for (day of dayOptions; track day) {
+                <button
+                  type="button"
+                  class="day-picker__chip"
+                  [class.day-picker__chip--active]="isCreateDaySelected(day)"
+                  (click)="toggleCreateDay(day)"
+                >
+                  {{ day.slice(0, 3) }}
+                </button>
+              }
+            </div>
+          </section>
+
+          @if (errorMessage) {
+            <div class="form-error">{{ errorMessage }}</div>
+          }
+
+          <div class="dialog__actions">
+            <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
+            <button type="submit" class="feature-page__action" [disabled]="isCreating">
+              {{ isCreating ? 'Creating...' : 'Create availability' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (isDetailsDialogOpen && selectedAvailability) {
+    <div class="dialog-overlay" (click)="closeDetailsDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Doctor Availability</p>
+            <h3>Availability details</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeDetailsDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <dl class="details-grid">
+          <dt>Doctor ID</dt><dd>{{ selectedAvailability.userId }}</dd>
+          <dt>Reservation Days</dt>
+          <dd>
+            <div class="day-chips">
+              @for (day of selectedAvailability.reservationDays; track day) {
+                <span class="day-chip">{{ day }}</span>
+              }
+            </div>
+          </dd>
+          <dt>Start Time</dt><dd>{{ selectedAvailability.startTime.slice(0, 5) }}</dd>
+          <dt>End Time</dt><dd>{{ selectedAvailability.endTime.slice(0, 5) }}</dd>
+          <dt>Created At</dt><dd>{{ selectedAvailability.createdAt | date: 'dd MMM yyyy, HH:mm' }}</dd>
+        </dl>
+
+        @if (deleteConfirmationId === selectedAvailability.id) {
+          <div class="delete-confirmation delete-confirmation--dialog">
+            <span>Delete this availability record?</span>
+            <button
+              type="button"
+              class="delete-button"
+              (click)="deleteAvailability(selectedAvailability.id)"
+              [disabled]="isDeleting"
+            >
+              {{ isDeleting ? 'Deleting...' : 'Delete now' }}
+            </button>
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="cancelDelete()"
+              [disabled]="isDeleting"
+            >
+              Cancel
+            </button>
+          </div>
+        }
+
+        <div class="dialog__actions">
+          <button type="button" class="secondary-button" (click)="closeDetailsDialog()">Close</button>
+          <button type="button" class="icon-button" (click)="openEditDialogFromDetails()">Edit</button>
+          @if (deleteConfirmationId !== selectedAvailability.id) {
+            <button type="button" class="delete-button" (click)="showDeleteConfirmation(selectedAvailability.id)">
+              Delete
+            </button>
+          }
+        </div>
+      </section>
+    </div>
+  }
+
+  @if (isEditDialogOpen) {
+    <div class="dialog-overlay" (click)="closeEditDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Doctor Availability</p>
+            <h3>Edit availability</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeEditDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form" (ngSubmit)="updateAvailability()">
+          <label>
+            <span>Doctor User ID</span>
+            <input type="text" [(ngModel)]="editForm.userId" name="editUserId" placeholder="UUID" required />
+          </label>
+
+          <label>
+            <span>Start Time</span>
+            <input type="time" [(ngModel)]="editForm.startTime" name="editStartTime" required />
+          </label>
+
+          <label>
+            <span>End Time</span>
+            <input type="time" [(ngModel)]="editForm.endTime" name="editEndTime" required />
+          </label>
+
+          <section class="day-picker">
+            <p>Reservation days</p>
+            <div class="day-picker__grid">
+              @for (day of dayOptions; track day) {
+                <button
+                  type="button"
+                  class="day-picker__chip"
+                  [class.day-picker__chip--active]="isEditDaySelected(day)"
+                  (click)="toggleEditDay(day)"
+                >
+                  {{ day.slice(0, 3) }}
+                </button>
+              }
+            </div>
+          </section>
+
+          @if (errorMessage) {
+            <div class="form-error">{{ errorMessage }}</div>
+          }
+
+          <div class="dialog__actions">
+            <button type="button" class="secondary-button" (click)="closeEditDialog()">Cancel</button>
+            <button type="submit" class="feature-page__action" [disabled]="isUpdating">
+              {{ isUpdating ? 'Saving...' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
 </section>
