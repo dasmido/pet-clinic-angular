@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChronicDiseaseApiService, ChronicDiseaseRecord } from '../../services/chronic-disease-api.service';
 import { PatientApiService, Patient } from '../../services/patient-api.service';
@@ -61,6 +61,18 @@ export class ChronicDiseasesPageComponent implements OnInit {
   ngOnInit(): void {
     this.loadPatients();
     this.loadChronicDiseases();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscKey(): void {
+    if (this.isAddDialogOpen) {
+      this.closeAddDialog();
+      return;
+    }
+
+    if (this.isFilterDialogOpen) {
+      this.closeFilterDialog();
+    }
   }
 
   loadPatients(): void {

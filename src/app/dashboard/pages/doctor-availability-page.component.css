@@ -1,0 +1,606 @@
+@import './dashboard-feature-page.css';
+
+.availability-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.availability-toolbar__search {
+  display: grid;
+  gap: 8px;
+  width: min(460px, 100%);
+}
+
+.availability-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.availability-toolbar__search label {
+  color: #94add4;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.availability-toolbar__search input,
+.dialog__form input,
+.dialog__form select {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 11px 13px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #eaf3ff;
+  outline: none;
+}
+
+.availability-toolbar__search input::placeholder,
+.dialog__form input::placeholder {
+  color: #8da7ce;
+}
+
+.availability-toolbar__search input:focus,
+.dialog__form input:focus,
+.dialog__form select:focus {
+  border-color: rgba(131, 180, 255, 0.52);
+  box-shadow: 0 0 0 4px rgba(112, 170, 255, 0.16);
+}
+
+.dialog__form select {
+  font-size: 0.94rem;
+  cursor: pointer;
+}
+
+.dialog__form select option {
+  background: rgba(13, 23, 40, 0.96);
+  color: #eaf3ff;
+}
+
+.secondary-button,
+.icon-button,
+.icon-close,
+.delete-button,
+.day-picker__chip {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #dfebff;
+  cursor: pointer;
+  transition: transform 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+
+.secondary-button,
+.icon-button,
+.delete-button {
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.secondary-button:hover,
+.icon-button:hover,
+.icon-close:hover,
+.day-picker__chip:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.delete-button {
+  color: #ff8b94;
+  border-color: rgba(255, 139, 148, 0.3);
+  background: rgba(255, 139, 148, 0.08);
+}
+
+.delete-button:hover:not(:disabled) {
+  background: rgba(255, 139, 148, 0.16);
+  border-color: rgba(255, 139, 148, 0.5);
+}
+
+.availability-table-wrapper {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  overflow: auto;
+}
+
+.availability-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+}
+
+.availability-table th,
+.availability-table td {
+  text-align: left;
+  padding: 13px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.availability-table th {
+  color: #8ea9d4;
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.availability-table td {
+  color: #e7f2ff;
+  font-size: 0.94rem;
+}
+
+.availability-table tbody tr:hover {
+  background: rgba(139, 181, 255, 0.08);
+}
+
+.availability-table__empty {
+  color: #a8bfdf !important;
+  text-align: center !important;
+  padding: 26px !important;
+}
+
+.doctor-id {
+  display: inline-block;
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.day-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.day-chip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(218, 164, 53, 0.4);
+  background: rgba(184, 136, 40, 0.32);             /* darker yellow background */
+  color: #ffd580;
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.details-button {
+  white-space: nowrap;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 10px 16px;
+  margin: 0;
+  padding: 4px 0 2px;
+}
+
+.details-grid dt {
+  color: #9eb8df;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.details-grid dd {
+  margin: 0;
+  color: #e7f2ff;
+}
+
+.delete-confirmation {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.delete-confirmation--dialog {
+  margin-top: 14px;
+  margin-bottom: 2px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 139, 148, 0.24);
+  background: rgba(255, 139, 148, 0.09);
+}
+
+.delete-confirmation span {
+  color: #ffb347;
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px;
+  color: #a8bfdf;
+  font-size: 0.94rem;
+  min-height: 200px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(151, 181, 255, 0.25);
+  border-top-color: #9bd0ff;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-state,
+.form-error,
+.inline-error {
+  color: #ff6b7a;
+}
+
+.inline-error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 107, 122, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 107, 122, 0.3);
+}
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(5, 10, 19, 0.7);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.dialog {
+  width: min(760px, 100%);
+  max-height: 92dvh;
+  overflow: auto;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(160deg, rgba(13, 23, 40, 0.96), rgba(14, 28, 46, 0.96));
+  box-shadow: 0 34px 100px rgba(0, 0, 0, 0.45);
+  padding: 20px;
+}
+
+.dialog__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+
+.dialog__header p {
+  margin: 0 0 6px;
+  color: #8fb4f2;
+  font-size: 0.76rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.dialog__header h3 {
+  margin: 0;
+  color: #f2f7ff;
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
+}
+
+.icon-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+.dialog__form {
+  display: grid;
+  gap: 12px;
+}
+
+.dialog__form label {
+  display: grid;
+  gap: 8px;
+}
+
+.dialog__form span,
+.day-picker p {
+  margin: 0;
+  color: #a7c0e3;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.form-field-readonly {
+  display: grid;
+  gap: 8px;
+}
+
+.form-field-readonly__label {
+  margin: 0;
+  color: #a7c0e3;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.form-field-readonly__value {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 11px 13px;
+  background: rgba(255, 255, 255, 0.02);
+  color: #dce8ff;
+  font-size: 0.94rem;
+}
+
+.day-picker {
+  margin-top: 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(126, 188, 255, 0.25);
+  background: rgba(126, 188, 255, 0.08);
+  padding: 12px;
+}
+
+.day-picker__grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.day-picker__chip {
+  padding: 8px 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.day-picker__chip--active {
+  border-color: rgba(126, 188, 255, 0.6);
+  background: linear-gradient(135deg, rgba(126, 188, 255, 0.3), rgba(95, 127, 253, 0.24));
+}
+
+.dialog__actions {
+  display: flex;
+  justify-content: end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.form-error {
+  font-size: 0.88rem;
+  padding: 10px 12px;
+  background: rgba(255, 107, 122, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 107, 122, 0.3);
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pagination-info {
+  color: #a8bfdf;
+  font-size: 0.88rem;
+}
+
+.secondary-button:disabled,
+.delete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+@media (max-width: 1080px) {
+  .day-picker__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .availability-toolbar,
+  .availability-toolbar__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .secondary-button,
+  .feature-page__action {
+    width: 100%;
+  }
+
+  .dialog__actions {
+    flex-direction: column;
+  }
+
+  .dialog__actions .secondary-button,
+  .dialog__actions .feature-page__action {
+    width: 100%;
+  }
+
+  .day-picker__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .delete-confirmation {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 540px) {
+  .day-picker__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+:host-context(.theme-light) .availability-toolbar__search label,
+:host-context(.theme-light) .dialog__form span,
+:host-context(.theme-light) .day-picker p {
+  color: #5b78a9;
+}
+
+:host-context(.theme-light) .form-field-readonly__label {
+  color: #5b78a9;
+}
+
+:host-context(.theme-light) .form-field-readonly__value {
+  background: rgba(238, 246, 255, 0.5);
+  border-color: rgba(110, 144, 196, 0.28);
+  color: #224167;
+}
+
+:host-context(.theme-light) .availability-toolbar__search input,
+:host-context(.theme-light) .dialog__form input,
+:host-context(.theme-light) .dialog__form select,
+:host-context(.theme-light) .secondary-button,
+:host-context(.theme-light) .icon-button,
+:host-context(.theme-light) .icon-close,
+:host-context(.theme-light) .day-picker__chip {
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(110, 144, 196, 0.28);
+  color: #224167;
+}
+
+:host-context(.theme-light) .day-picker {
+  background: rgba(126, 188, 255, 0.12);
+  border-color: rgba(110, 144, 196, 0.3);
+}
+
+:host-context(.theme-light) .dialog__form select option {
+  background: #f8fcff;
+  color: #224167;
+}
+
+:host-context(.theme-light) .day-picker__chip--active {
+  background: linear-gradient(135deg, rgba(126, 188, 255, 0.34), rgba(95, 127, 253, 0.2));
+}
+
+:host-context(.theme-light) .delete-button {
+  color: #c94a54;
+  border-color: rgba(201, 74, 84, 0.3);
+  background: rgba(201, 74, 84, 0.08);
+}
+
+:host-context(.theme-light) .delete-button:hover:not(:disabled) {
+  background: rgba(201, 74, 84, 0.16);
+  border-color: rgba(201, 74, 84, 0.5);
+}
+
+:host-context(.theme-light) .availability-table-wrapper,
+:host-context(.theme-light) .availability-table th,
+:host-context(.theme-light) .availability-table td {
+  border-color: rgba(112, 146, 194, 0.24);
+}
+
+:host-context(.theme-light) .availability-table th {
+  background: rgba(238, 246, 255, 0.92);
+  color: #5a7eaf;
+}
+
+:host-context(.theme-light) .availability-table td,
+:host-context(.theme-light) .dialog__header h3 {
+  color: #223f66;
+}
+
+:host-context(.theme-light) .details-grid dt {
+  color: #5d7fae;
+}
+
+:host-context(.theme-light) .details-grid dd {
+  color: #224167;
+}
+
+:host-context(.theme-light) .availability-table tbody tr:hover {
+  background: rgba(148, 188, 255, 0.2);
+}
+
+:host-context(.theme-light) .availability-table__empty {
+  color: #5f7aa2 !important;
+}
+
+:host-context(.theme-light) .doctor-id {
+  border-color: rgba(110, 144, 196, 0.26);
+  background: rgba(110, 144, 196, 0.14);
+  color: #33547f;
+}
+
+:host-context(.theme-light) .day-chip {
+  background: rgba(184, 136, 40, 0.24);
+  border-color: rgba(184, 136, 40, 0.5);
+  color: #8b6a1a;
+}
+
+:host-context(.theme-light) .delete-confirmation span {
+  color: #e0a040;
+}
+
+:host-context(.theme-light) .dialog-overlay {
+  background: rgba(78, 112, 158, 0.25);
+}
+
+:host-context(.theme-light) .dialog {
+  background: linear-gradient(170deg, rgba(248, 252, 255, 0.98), rgba(236, 244, 255, 0.98));
+  border-color: rgba(111, 146, 196, 0.26);
+  box-shadow: 0 26px 70px rgba(117, 153, 196, 0.26);
+}
+
+:host-context(.theme-light) .dialog__header p {
+  color: #547ab2;
+}
+
+:host-context(.theme-light) .loading-state {
+  color: #6b8ec0;
+}
+
+:host-context(.theme-light) .loading-spinner {
+  border-color: rgba(103, 143, 198, 0.24);
+  border-top-color: #4f8cdd;
+}
+
+:host-context(.theme-light) .error-state,
+:host-context(.theme-light) .form-error,
+:host-context(.theme-light) .inline-error {
+  color: #d84a54;
+}
+
+:host-context(.theme-light) .pagination-controls {
+  background: rgba(238, 246, 255, 0.5);
+  border-color: rgba(112, 146, 194, 0.24);
+}
+
+:host-context(.theme-light) .pagination-info {
+  color: #6b8ec0;
+}

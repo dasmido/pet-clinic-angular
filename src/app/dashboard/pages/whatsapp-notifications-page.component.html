@@ -1,0 +1,90 @@
+<section class="feature-page whatsapp-page">
+  <header class="feature-page__hero">
+    <div>
+      <p class="feature-page__eyebrow">Whatsapp Notifications</p>
+      <h2>Message delivery log</h2>
+      <p>Review sent WhatsApp notifications and create new messages for patients.</p>
+    </div>
+    <div class="whatsapp-hero__actions">
+      <button type="button" class="secondary-button" (click)="exportLogsToExcel()" [disabled]="messages.length === 0">
+        Export to Excel
+      </button>
+      <button type="button" class="feature-page__action" (click)="openCreateDialog()">Create new message</button>
+    </div>
+  </header>
+
+  <article class="feature-page__panel">
+    <div class="whatsapp-table-wrapper">
+      <table class="whatsapp-table">
+        <thead>
+          <tr>
+            <th>Receiver mobile number</th>
+            <th>Message description</th>
+            <th>Sent date</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @if (messages.length === 0) {
+            <tr>
+              <td colspan="3" class="whatsapp-table__empty">No messages sent yet.</td>
+            </tr>
+          }
+
+          @for (message of messages; track $index) {
+            <tr>
+              <td>{{ message.receiverMobile }}</td>
+              <td>{{ message.messageBody }}</td>
+              <td>{{ message.sentDate | date: 'dd MMM yyyy, HH:mm' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  @if (isCreateDialogOpen) {
+    <div class="dialog-overlay" (click)="closeCreateDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Whatsapp message</p>
+            <h3>Create new message</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeCreateDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form" (ngSubmit)="createMessage()">
+          <label>
+            <span>To mobile number</span>
+            <input
+              type="tel"
+              [(ngModel)]="newMessageForm.receiverMobile"
+              name="receiverMobile"
+              placeholder="+2010XXXXXXXX"
+              required
+            />
+          </label>
+
+          <label>
+            <span>Message body</span>
+            <textarea
+              [(ngModel)]="newMessageForm.messageBody"
+              name="messageBody"
+              rows="4"
+              placeholder="Write your message here"
+              required
+            ></textarea>
+          </label>
+
+          <div class="dialog__actions">
+            <button type="button" class="secondary-button" (click)="closeCreateDialog()">Cancel</button>
+            <button type="submit" class="feature-page__action">Send message</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+</section>

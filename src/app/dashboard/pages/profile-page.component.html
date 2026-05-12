@@ -89,6 +89,58 @@
           </div>
         </section>
       </div>
+
+      <section class="profile-section profile-section--whatsapp">
+        <div class="section-header">
+          <h2>WhatsApp Integration</h2>
+          <p class="section-description">Configure messaging gateway credentials for notifications</p>
+        </div>
+
+        <form class="integration-form" (ngSubmit)="saveWhatsappIntegration()">
+          <div class="info-item full-width">
+            <label for="wa-url">WhatsApp URL</label>
+            <input
+              id="wa-url"
+              type="url"
+              name="whatsappUrl"
+              [(ngModel)]="whatsappIntegrationForm.url"
+              placeholder="https://api.provider.com/send"
+              required
+            />
+          </div>
+
+          <div class="info-item">
+            <label for="wa-instance-id">Instance ID</label>
+            <input
+              id="wa-instance-id"
+              type="text"
+              name="whatsappInstanceId"
+              [(ngModel)]="whatsappIntegrationForm.instanceId"
+              placeholder="instance_12345"
+              required
+            />
+          </div>
+
+          <div class="info-item">
+            <label for="wa-token">Token</label>
+            <input
+              id="wa-token"
+              type="password"
+              name="whatsappToken"
+              [(ngModel)]="whatsappIntegrationForm.token"
+              placeholder="Enter secure token"
+              required
+            />
+          </div>
+
+          <div class="integration-form__actions">
+            <button type="submit" class="integration-form__save">Save Integration</button>
+            @if (integrationSaved()) {
+              <span class="integration-form__saved">Saved</span>
+            }
+          </div>
+        </form>
+      </section>
     </div>
   }
 </section>

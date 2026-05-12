@@ -7,6 +7,7 @@ import { ChronicDiseasesPageComponent } from './dashboard/pages/chronic-diseases
 import { ProfilePageComponent } from './dashboard/pages/profile-page.component';
 import { ReservationsPageComponent } from './dashboard/pages/reservations-page.component';
 import { UsersPageComponent } from './dashboard/pages/users-page.component';
+import { WhatsappNotificationsPageComponent } from './dashboard/pages/whatsapp-notifications-page.component';
 import { LoginPageComponent } from './auth/login-page.component';
 import { RegisterPageComponent } from './auth/register-page.component';
 import { authChildGuard, authGuard, guestGuard } from './auth/auth.guards';
@@ -61,6 +62,10 @@ export const routes: Routes = [
 			{
 				path: 'cashbox',
 				component: CashboxPageComponent,
+			},
+			{
+				path: 'whatsapp-notifications',
+				component: WhatsappNotificationsPageComponent,
 			},
 			{
 				path: 'profile',

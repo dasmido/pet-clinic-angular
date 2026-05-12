@@ -58,6 +58,7 @@ export class DashboardPageComponent {
     { icon: 'coffee_maker', label: 'Doctor Availability', path: 'doctor-availability', hint: 'Availability' },
     { icon: 'manage_accounts', label: 'Users', path: 'users', hint: 'Staff access' },
     { icon: 'point_of_sale', label: 'Cashbox', path: 'cashbox', hint: 'Payments' },
+    { icon: 'medication', label: 'Whatsapp Notifications', path: 'whatsapp-notifications', hint: 'Message templates' },
     { icon: 'account_circle', label: 'Profile', path: 'profile', hint: 'Admin account' },
   ];
 
