@@ -25,6 +25,10 @@ export interface UsersListResponse {
   };
 }
 
+export interface DeleteUserPayload {
+  id: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -57,5 +61,14 @@ export class UserApiService {
         headers: this.getAuthHeaders(),
       }
     );
+  }
+
+  deleteUser(id: string): Observable<unknown> {
+    const payload: DeleteUserPayload = { id };
+
+    return this.http.delete(`${this.API_BASE}/users/delete`, {
+      headers: this.getAuthHeaders(),
+      body: payload,
+    });
   }
 }

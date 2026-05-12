@@ -2,41 +2,156 @@
   <header class="feature-page__hero">
     <div>
       <p class="feature-page__eyebrow">Users</p>
-      <h2>Team access</h2>
-      <p>Manage staff accounts, onboarding states, and role assignment for PetClinic.</p>
+      <h2>User Management</h2>
+      <p>Manage team accounts, role access, and lifecycle operations for clinic staff.</p>
     </div>
-    <button type="button" class="feature-page__action">Invite user</button>
+    <button type="button" class="feature-page__action" (click)="openAddDialog()">Add new user</button>
   </header>
 
-  <section class="feature-page__metrics">
-    @for (metric of metrics; track metric.label) {
-      <article class="feature-page__metric">
-        <span>{{ metric.label }}</span>
-        <strong>{{ metric.value }}</strong>
-        <small>{{ metric.delta }}</small>
-      </article>
-    }
-  </section>
-
   <article class="feature-page__panel">
-    <div class="feature-page__panel-header">
-      <div>
-        <p>Users</p>
-        <h3>Access roster</h3>
+    <div class="users-toolbar">
+      <div class="users-toolbar__search">
+        <label for="users-quick-search">Quick search</label>
+        <input
+          id="users-quick-search"
+          type="text"
+          placeholder="Name, email, or role"
+          [(ngModel)]="quickSearch"
+        />
       </div>
-      <span>Keep permissions aligned with daily clinic operations.</span>
+
+      <div class="users-toolbar__actions">
+        <button type="button" class="secondary-button" (click)="loadUsers()">Refresh</button>
+        <button type="button" class="secondary-button" (click)="openAddDialog()">Add new user</button>
+      </div>
     </div>
 
-    <div class="feature-page__list">
-      @for (record of records; track record.heading) {
-        <div class="feature-page__item">
-          <div>
-            <strong>{{ record.heading }}</strong>
-            <span>{{ record.subheading }}</span>
-          </div>
-          <small>{{ record.status }}</small>
-        </div>
+    <div class="users-table-wrapper">
+      @if (isLoading) {
+        <div class="loading-state">Loading users...</div>
+      } @else if (errorMessage) {
+        <div class="error-state">{{ errorMessage }}</div>
+      } @else {
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Full name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Created</th>
+              <th>Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @if (filteredUsers.length === 0) {
+              <tr>
+                <td colspan="6" class="users-table__empty">No users found for the current page and search filters.</td>
+              </tr>
+            }
+
+            @for (user of filteredUsers; track user.id) {
+              <tr>
+                <td>{{ user.fullname }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                  <span class="role-chip">{{ user.roles }}</span>
+                </td>
+                <td>{{ user.createdAt ? (user.createdAt | date: 'dd MMM yyyy, HH:mm') : 'N/A' }}</td>
+                <td>{{ user.updatedAt ? (user.updatedAt | date: 'dd MMM yyyy, HH:mm') : 'N/A' }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="danger-button"
+                    [disabled]="isDeleting"
+                    (click)="deleteUser(user)"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       }
     </div>
+
+    <div class="pagination-controls">
+      <button type="button" class="secondary-button" (click)="previousPage()" [disabled]="currentPage <= 1 || isLoading">
+        ← Previous
+      </button>
+      <span class="pagination-info">
+        Page {{ currentPage }} of {{ totalPages || 1 }} ({{ totalUsers }} total users)
+      </span>
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="nextPage()"
+        [disabled]="currentPage >= totalPages || isLoading || totalPages === 0"
+      >
+        Next →
+      </button>
+    </div>
   </article>
+
+  @if (isAddDialogOpen) {
+    <div class="dialog-overlay" (click)="closeAddDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Users</p>
+            <h3>Add new user</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeAddDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form" (ngSubmit)="createUser()">
+          <label>
+            <span>Username</span>
+            <input type="text" [(ngModel)]="newUserForm.username" name="newUserUsername" required />
+          </label>
+
+          <label>
+            <span>Password</span>
+            <input type="password" [(ngModel)]="newUserForm.password" name="newUserPassword" required />
+          </label>
+
+          <label>
+            <span>Full name</span>
+            <input type="text" [(ngModel)]="newUserForm.fullname" name="newUserFullname" required />
+          </label>
+
+          <label>
+            <span>Phone</span>
+            <input type="text" [(ngModel)]="newUserForm.phone" name="newUserPhone" required />
+          </label>
+
+          <label>
+            <span>Role</span>
+            <select [(ngModel)]="newUserForm.role" name="newUserRole" required>
+              @for (role of availableRoles; track role) {
+                <option [value]="role">{{ role }}</option>
+              }
+            </select>
+          </label>
+
+          @if (addErrorMessage) {
+            <div class="form-error">
+              {{ addErrorMessage }}
+            </div>
+          }
+
+          <div class="dialog__actions">
+            <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
+            <button type="submit" class="feature-page__action" [disabled]="isCreating">
+              {{ isCreating ? 'Creating...' : 'Create user' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
 </section>
