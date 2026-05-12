@@ -1,5 +1,22 @@
 <main class="dashboard-layout">
-  <aside class="sidebar">
+  <button
+    type="button"
+    class="mobile-menu-toggle"
+    (click)="toggleSidebar()"
+    [attr.aria-expanded]="isSidebarOpen"
+    aria-controls="dashboard-sidebar"
+    aria-label="Toggle sidebar menu"
+  >
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  @if (isSidebarOpen) {
+    <button type="button" class="sidebar-overlay" (click)="closeSidebar()" aria-label="Close sidebar"></button>
+  }
+
+  <aside id="dashboard-sidebar" class="sidebar" [class.sidebar--open]="isSidebarOpen">
     <div class="brand">
       <div class="brand__mark">PC</div>
       <div>
@@ -15,6 +32,7 @@
           [routerLink]="['/dashboard', item.path]"
           routerLinkActive="nav-item--active"
           [routerLinkActiveOptions]="{ exact: true }"
+          (click)="closeSidebarOnMobile()"
         >
           <span class="nav-item__main">
             <ng-icon [name]="item.icon" class="nav-item__icon" aria-hidden="true"></ng-icon>
