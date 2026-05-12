@@ -71,7 +71,7 @@
 
 .nav-list {
   display: grid;
-  gap: 10px;
+  /*gap: 10px;*/
   align-content: start;
 }
 
@@ -81,11 +81,11 @@
   align-items: center;
   gap: 12px;
   padding: 14px 15px;
-  border-radius: 16px;
+  /*border-radius: 16px;*/
   color: #dce8ff;
   text-decoration: none;
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid transparent;
+ /* border: 1px solid transparent;*/
   transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
 }
 
