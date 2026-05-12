@@ -166,9 +166,9 @@
   text-transform: uppercase;
   padding: 5px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(126, 188, 255, 0.4);
-  background: rgb(228, 232, 1);
-  color: #dbeafd;
+  border: 1px solid rgba(218, 164, 53, 0.4);
+  background: rgba(184, 136, 40, 0.32);             /* darker yellow background */
+  color: #ffd580;
 }
 
 .row-actions {
@@ -558,7 +558,9 @@
 }
 
 :host-context(.theme-light) .day-chip {
-  color: #30537f;
+  background: rgba(184, 136, 40, 0.24);
+  border-color: rgba(184, 136, 40, 0.5);
+  color: #8b6a1a;
 }
 
 :host-context(.theme-light) .delete-confirmation span {
