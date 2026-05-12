@@ -1,0 +1,120 @@
+.confirm-delete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  background: rgba(5, 10, 19, 0.7);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.confirm-delete-dialog {
+  width: min(460px, 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(160deg, rgba(13, 23, 40, 0.98), rgba(14, 28, 46, 0.98));
+  box-shadow: 0 34px 100px rgba(0, 0, 0, 0.45);
+  padding: 18px;
+}
+
+.confirm-delete-header h3 {
+  margin: 0;
+  color: #f2f7ff;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.confirm-delete-message {
+  margin: 12px 0 18px;
+  color: #c7d9f4;
+  line-height: 1.5;
+}
+
+.confirm-delete-actions {
+  display: flex;
+  justify-content: end;
+  gap: 10px;
+}
+
+.secondary-button,
+.danger-button {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 140ms ease, background-color 140ms ease;
+}
+
+.secondary-button {
+  background: rgba(255, 255, 255, 0.05);
+  color: #dfebff;
+}
+
+.danger-button {
+  border-color: rgba(255, 138, 151, 0.36);
+  color: #ffb5bf;
+  background: rgba(255, 138, 151, 0.1);
+}
+
+.secondary-button:hover,
+.danger-button:hover {
+  transform: translateY(-1px);
+}
+
+.secondary-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.danger-button:hover {
+  background: rgba(255, 138, 151, 0.18);
+}
+
+.secondary-button:disabled,
+.danger-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 640px) {
+  .confirm-delete-actions {
+    flex-direction: column;
+  }
+
+  .secondary-button,
+  .danger-button {
+    width: 100%;
+  }
+}
+
+:host-context(.theme-light) .confirm-delete-overlay {
+  background: rgba(78, 112, 158, 0.25);
+}
+
+:host-context(.theme-light) .confirm-delete-dialog {
+  background: linear-gradient(170deg, rgba(248, 252, 255, 0.98), rgba(236, 244, 255, 0.98));
+  border-color: rgba(111, 146, 196, 0.26);
+  box-shadow: 0 26px 70px rgba(117, 153, 196, 0.26);
+}
+
+:host-context(.theme-light) .confirm-delete-header h3 {
+  color: #223f66;
+}
+
+:host-context(.theme-light) .confirm-delete-message {
+  color: #4f709c;
+}
+
+:host-context(.theme-light) .secondary-button {
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(110, 144, 196, 0.28);
+  color: #224167;
+}
+
+:host-context(.theme-light) .danger-button {
+  background: rgba(255, 220, 224, 0.9);
+  border-color: rgba(213, 112, 124, 0.34);
+  color: #9a2f3c;
+}

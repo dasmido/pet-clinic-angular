@@ -6,11 +6,13 @@ import { AuthStateService } from '../auth/auth-state.service';
 
 export interface User {
   id: string;
+  role: string;
+  username: string;
+  phone: string;
   fullname: string;
-  email: string;
-  roles: string;
+  isActive: boolean;
+  fcmToken: string | null;
   createdAt?: string;
-  updatedAt?: string;
 }
 
 export interface UsersListResponse {

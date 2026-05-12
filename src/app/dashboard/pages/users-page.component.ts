@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, HostListener, NgZone, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID, inject } from '@angular/core';
@@ -7,6 +7,7 @@ import { PLATFORM_ID, inject } from '@angular/core';
 import { AuthApiService, AuthRole, extractAuthErrorMessage } from '../../auth/auth-api.service';
 import { AuthStateService } from '../../auth/auth-state.service';
 import { User, UserApiService } from '../../services/user-api.service';
+import { ConfirmDeleteDialogComponent } from '../../shared/components/confirm-delete-dialog.component';
 
 interface NewUserForm {
   username: string;
@@ -16,16 +17,25 @@ interface NewUserForm {
   role: AuthRole;
 }
 
+interface UserSearchCriteria {
+  fullname: string;
+  username: string;
+  phone: string;
+  role: '' | AuthRole;
+  status: '' | 'ACTIVE' | 'INACTIVE';
+}
+
 @Component({
   selector: 'app-users-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmDeleteDialogComponent],
   templateUrl: './users-page.component.html',
   styleUrls: ['./users-page.component.css'],
 })
 export class UsersPageComponent implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly authStateService = inject(AuthStateService);
+  @ViewChild('quickSearchInput') private quickSearchInput?: ElementRef<HTMLInputElement>;
 
   constructor(
     private readonly userApiService: UserApiService,
@@ -49,8 +59,20 @@ export class UsersPageComponent implements OnInit {
   addErrorMessage = '';
 
   quickSearch = '';
+  isQuickSearchOpen = false;
+  isDeleteDialogOpen = false;
+  isAdvancedSearchOpen = false;
+
+  searchCriteria: UserSearchCriteria = {
+    fullname: '',
+    username: '',
+    phone: '',
+    role: '',
+    status: '',
+  };
 
   isAddDialogOpen = false;
+  pendingDeleteUser: User | null = null;
 
   newUserForm: NewUserForm = this.getDefaultNewUserForm();
 
@@ -66,6 +88,11 @@ export class UsersPageComponent implements OnInit {
   onEscKey(): void {
     if (this.isAddDialogOpen) {
       this.closeAddDialog();
+      return;
+    }
+
+    if (this.isAdvancedSearchOpen) {
+      this.closeAdvancedSearchDialog();
     }
   }
 
@@ -76,15 +103,35 @@ export class UsersPageComponent implements OnInit {
   get filteredUsers(): User[] {
     const query = this.quickSearch.trim().toLowerCase();
 
-    if (!query) {
-      return this.users;
-    }
-
     return this.users.filter((user) => {
+      const fullName = this.normalizeSearchValue(user.fullname);
+      const username = this.normalizeSearchValue(user.username);
+      const phone = this.normalizeSearchValue(user.phone);
+      const role = this.normalizeSearchValue(user.role);
+      const status = user.isActive ? 'active' : 'inactive';
+
+      const matchesQuickSearch = !query
+        || fullName.includes(query)
+        || username.includes(query)
+        || phone.includes(query)
+        || role.includes(query)
+        || status.includes(query);
+
+      const matchesFullname = this.matchesValue(user.fullname, this.searchCriteria.fullname);
+      const matchesUsername = this.matchesValue(user.username, this.searchCriteria.username);
+      const matchesPhone = this.matchesValue(user.phone, this.searchCriteria.phone);
+      const matchesRole = this.searchCriteria.role === '' || user.role === this.searchCriteria.role;
+      const matchesStatus = this.searchCriteria.status === ''
+        || (this.searchCriteria.status === 'ACTIVE' && user.isActive)
+        || (this.searchCriteria.status === 'INACTIVE' && !user.isActive);
+
       return (
-        user.fullname.toLowerCase().includes(query)
-        || user.email.toLowerCase().includes(query)
-        || user.roles.toLowerCase().includes(query)
+        matchesQuickSearch
+        && matchesFullname
+        && matchesUsername
+        && matchesPhone
+        && matchesRole
+        && matchesStatus
       );
     });
   }
@@ -144,6 +191,45 @@ export class UsersPageComponent implements OnInit {
     }
   }
 
+  toggleQuickSearch(): void {
+    this.isQuickSearchOpen = !this.isQuickSearchOpen;
+
+    if (!this.isQuickSearchOpen) {
+      return;
+    }
+
+    window.setTimeout(() => {
+      this.quickSearchInput?.nativeElement.focus();
+    }, 180);
+  }
+
+  clearQuickSearch(): void {
+    this.quickSearch = '';
+    this.quickSearchInput?.nativeElement.focus();
+  }
+
+  openAdvancedSearchDialog(): void {
+    this.isAdvancedSearchOpen = true;
+  }
+
+  closeAdvancedSearchDialog(): void {
+    this.isAdvancedSearchOpen = false;
+  }
+
+  applyAdvancedSearch(): void {
+    this.isAdvancedSearchOpen = false;
+  }
+
+  clearAdvancedSearch(): void {
+    this.searchCriteria = {
+      fullname: '',
+      username: '',
+      phone: '',
+      role: '',
+      status: '',
+    };
+  }
+
   openAddDialog(): void {
     this.newUserForm = this.getDefaultNewUserForm();
     this.addErrorMessage = '';
@@ -194,13 +280,27 @@ export class UsersPageComponent implements OnInit {
     });
   }
 
-  deleteUser(user: User): void {
+  openDeleteDialog(user: User): void {
     if (this.isDeleting || this.isLoading) {
       return;
     }
 
-    const confirmed = window.confirm(`Delete user ${user.fullname}? This cannot be undone.`);
-    if (!confirmed) {
+    this.pendingDeleteUser = user;
+    this.isDeleteDialogOpen = true;
+  }
+
+  closeDeleteDialog(): void {
+    if (this.isDeleting) {
+      return;
+    }
+
+    this.isDeleteDialogOpen = false;
+    this.pendingDeleteUser = null;
+  }
+
+  confirmDeleteUser(): void {
+    const user = this.pendingDeleteUser;
+    if (!user || this.isDeleting || this.isLoading) {
       return;
     }
 
@@ -211,6 +311,8 @@ export class UsersPageComponent implements OnInit {
       next: () => {
         this.ngZone.run(() => {
           this.isDeleting = false;
+          this.isDeleteDialogOpen = false;
+          this.pendingDeleteUser = null;
 
           const remainingInPage = this.users.length - 1;
           if (remainingInPage <= 0 && this.currentPage > 1) {
@@ -240,5 +342,34 @@ export class UsersPageComponent implements OnInit {
       phone: '',
       role: 'ADMIN',
     };
+  }
+
+  private normalizeSearchValue(value: unknown): string {
+    if (Array.isArray(value)) {
+      return value.join(' ').toLowerCase();
+    }
+
+    if (value === null || value === undefined) {
+      return '';
+    }
+
+    return String(value).toLowerCase();
+  }
+
+  private matchesValue(value: unknown, query: string): boolean {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) {
+      return true;
+    }
+
+    return this.normalizeSearchValue(value).includes(normalizedQuery);
+  }
+
+  get deleteDialogMessage(): string {
+    if (!this.pendingDeleteUser) {
+      return 'Are you sure you want to delete this item? This cannot be undone.';
+    }
+
+    return `Delete user ${this.pendingDeleteUser.fullname}? This cannot be undone.`;
   }
 }

@@ -1,0 +1,20 @@
+@if (isOpen) {
+  <div class="confirm-delete-overlay" (click)="onOverlayClick()">
+    <section class="confirm-delete-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <header class="confirm-delete-header">
+        <h3>{{ title }}</h3>
+      </header>
+
+      <p class="confirm-delete-message">{{ message }}</p>
+
+      <div class="confirm-delete-actions">
+        <button type="button" class="secondary-button" [disabled]="isProcessing" (click)="onCancel()">
+          {{ cancelText }}
+        </button>
+        <button type="button" class="danger-button" [disabled]="isProcessing" (click)="onConfirm()">
+          {{ isProcessing ? 'Deleting...' : confirmText }}
+        </button>
+      </div>
+    </section>
+  </div>
+}
