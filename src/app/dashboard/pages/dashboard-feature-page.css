@@ -43,13 +43,13 @@
 
 .feature-page__action {
   border: none;
-  border-radius: 16px;
+  border-radius: 0px;
   padding: 14px 18px;
   font-weight: 800;
   cursor: pointer;
   white-space: nowrap;
-  background: linear-gradient(135deg, #7ebcff 0%, #5f7ffd 100%);
-  color: #08111f;
+  background-color: #115330;
+  color: #ffffff;
   box-shadow: 0 14px 30px rgba(94, 124, 255, 0.26);
 }
 

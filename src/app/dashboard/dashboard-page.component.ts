@@ -53,7 +53,7 @@ export class DashboardPageComponent {
 
   readonly navItems: SidebarNavItem[] = [
     { icon: 'groups', label: 'Patients', path: 'patients', hint: 'Queue and records' },
-    { icon: 'medication', label: 'Chronic Diseases', path: 'chronic-diseases', hint: 'Disease management' },
+    // { icon: 'medication', label: 'Chronic Diseases', path: 'chronic-diseases', hint: 'Disease management' },
     { icon: 'event_available', label: 'Reservations', path: 'reservations', hint: 'Appointments' },
     { icon: 'coffee_maker', label: 'Doctor Availability', path: 'doctor-availability', hint: 'Availability' },
     { icon: 'manage_accounts', label: 'Users', path: 'users', hint: 'Staff access' },
