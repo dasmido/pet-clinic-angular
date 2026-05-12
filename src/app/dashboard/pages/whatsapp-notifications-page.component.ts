@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 interface WhatsappMessageRecord {
@@ -22,6 +22,13 @@ interface NewWhatsappMessageForm {
 })
 export class WhatsappNotificationsPageComponent {
   isCreateDialogOpen = false;
+
+  @HostListener('document:keydown.escape')
+  onEscKey(): void {
+    if (this.isCreateDialogOpen) {
+      this.closeCreateDialog();
+    }
+  }
 
   readonly messages: WhatsappMessageRecord[] = [
     {

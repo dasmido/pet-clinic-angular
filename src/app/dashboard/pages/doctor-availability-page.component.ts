@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, NgZone, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import {
@@ -72,6 +72,27 @@ export class DoctorAvailabilityPageComponent implements OnInit {
   ngOnInit(): void {
     this.loadUsers();
     this.loadAvailability();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape') {
+      return;
+    }
+
+    if (this.isEditDialogOpen) {
+      this.closeEditDialog();
+      return;
+    }
+
+    if (this.isDetailsDialogOpen) {
+      this.closeDetailsDialog();
+      return;
+    }
+
+    if (this.isAddDialogOpen) {
+      this.closeAddDialog();
+    }
   }
 
   get totalPages(): number {

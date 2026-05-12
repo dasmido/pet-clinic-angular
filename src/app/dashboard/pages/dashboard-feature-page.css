@@ -193,7 +193,7 @@
 }
 
 :host-context(.theme-light) .feature-page__hero {
-  background: linear-gradient(135deg, rgba(237, 245, 255, 0.94), rgba(225, 237, 255, 0.9));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.9));
   border-color: rgba(117, 149, 196, 0.22);
   box-shadow: 0 22px 70px rgba(129, 166, 214, 0.18);
 }
