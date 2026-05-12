@@ -10,7 +10,7 @@ import { UsersPageComponent } from './dashboard/pages/users-page.component';
 import { WhatsappNotificationsPageComponent } from './dashboard/pages/whatsapp-notifications-page.component';
 import { LoginPageComponent } from './auth/login-page.component';
 import { RegisterPageComponent } from './auth/register-page.component';
-import { authChildGuard, authGuard, guestGuard } from './auth/auth.guards';
+import { authChildGuard, authGuard, guestGuard, superAdminGuard } from './auth/auth.guards';
 
 export const routes: Routes = [
 	{
@@ -58,10 +58,12 @@ export const routes: Routes = [
 			{
 				path: 'users',
 				component: UsersPageComponent,
+				canActivate: [superAdminGuard],
 			},
 			{
 				path: 'cashbox',
 				component: CashboxPageComponent,
+				canActivate: [superAdminGuard],
 			},
 			{
 				path: 'whatsapp-notifications',

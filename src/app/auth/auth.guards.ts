@@ -51,3 +51,23 @@ export const guestGuard: CanActivateFn = () => {
 
   return router.parseUrl('/dashboard');
 };
+
+export const superAdminGuard: CanActivateFn = () => {
+  if (!isBrowser()) {
+    return true;
+  }
+
+  const authState = inject(AuthStateService);
+  const router = inject(Router);
+
+  if (!authState.isAuthenticated()) {
+    return router.parseUrl('/login');
+  }
+
+  const role = authState.getRole();
+  if (role === 'SUPERADMIN') {
+    return true;
+  }
+
+  return router.parseUrl('/dashboard/patients');
+};

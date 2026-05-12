@@ -2,41 +2,320 @@
   <header class="feature-page__hero">
     <div>
       <p class="feature-page__eyebrow">Cashbox</p>
-      <h2>Payments and invoices</h2>
-      <p>Keep track of revenue, open invoices, and refunds with a clear daily summary.</p>
+      <h2>Cashbox Management</h2>
+      <p>Track incoming and outgoing payments, edit entries, and keep financial activity visible.</p>
     </div>
-    <button type="button" class="feature-page__action">Open report</button>
+    <button type="button" class="feature-page__action" (click)="openAddDialog()">Add new payment</button>
   </header>
 
   <section class="feature-page__metrics">
-    @for (metric of metrics; track metric.label) {
-      <article class="feature-page__metric">
-        <span>{{ metric.label }}</span>
-        <strong>{{ metric.value }}</strong>
-        <small>{{ metric.delta }}</small>
-      </article>
-    }
+    <article class="feature-page__metric">
+      <span>Total Cash In</span>
+      <strong>{{ totalCashInPayment | number: '1.2-2' }}</strong>
+      <small>{{ cashInCount }} records</small>
+    </article>
+
+    <article class="feature-page__metric">
+      <span>Total Cash Out</span>
+      <strong>{{ totalCashOutPayment | number: '1.2-2' }}</strong>
+      <small>{{ cashOutCount }} records</small>
+    </article>
+
+    <article class="feature-page__metric">
+      <span>Net Difference</span>
+      <strong>{{ totalPaymentDifference | number: '1.2-2' }}</strong>
+      <small>Cash In - Cash Out</small>
+    </article>
   </section>
 
   <article class="feature-page__panel">
-    <div class="feature-page__panel-header">
-      <div>
-        <p>Cashbox</p>
-        <h3>Money movement</h3>
+    <div class="cashbox-toolbar">
+      <div class="cashbox-toolbar__search">
+        <label for="cashbox-quick-search">Quick search</label>
+        <input
+          id="cashbox-quick-search"
+          type="text"
+          placeholder="Type, category, description, currency, creator"
+          [(ngModel)]="quickSearch"
+        />
       </div>
-      <span>Finance should stay visible without leaving the dashboard.</span>
+
+      <div class="cashbox-toolbar__actions">
+        <button type="button" class="secondary-button" (click)="openAddDialog()">Add new payment</button>
+      </div>
     </div>
 
-    <div class="feature-page__list">
-      @for (record of records; track record.heading) {
-        <div class="feature-page__item">
-          <div>
-            <strong>{{ record.heading }}</strong>
-            <span>{{ record.subheading }}</span>
-          </div>
-          <small>{{ record.status }}</small>
-        </div>
+    <div class="cashbox-table-wrapper">
+      @if (isLoading) {
+        <div class="loading-state">Loading cashbox records...</div>
+      } @else if (errorMessage) {
+        <div class="error-state">{{ errorMessage }}</div>
+      } @else {
+        <table class="cashbox-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Date</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Payment</th>
+              <th>Payment Type</th>
+              <th>Currency</th>
+              <th>Created By</th>
+              <th>Created At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @if (filteredCashBoxes.length === 0) {
+              <tr>
+                <td colspan="10" class="cashbox-table__empty">No payment records found for this page and search.</td>
+              </tr>
+            }
+
+            @for (item of filteredCashBoxes; track item.cashBoxId) {
+              <tr>
+                <td>
+                  <span [class]="getTypeClass(item.cashBoxType)">{{ item.cashBoxType }}</span>
+                </td>
+                <td>{{ item.cashBoxEntryDate | date: 'dd MMM yyyy' }}</td>
+                <td>{{ item.cashBoxCategory }}</td>
+                <td>{{ item.cashBoxDescription }}</td>
+                <td>{{ item.cashBoxPayment }}</td>
+                <td>{{ item.cashBoxPaymentType }}</td>
+                <td>{{ item.cashBoxCurrency | uppercase }}</td>
+                <td>{{ item.creator?.fullname || item.cashBoxCreatedBy }}</td>
+                <td>{{ item.cashBoxCreatedAt | date: 'dd MMM yyyy, HH:mm' }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="icon-button"
+                    (click)="openDetailsDialog(item)"
+                    aria-label="Open payment details"
+                  >
+                    Details &#8599;
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       }
     </div>
+
+    <div class="pagination-controls">
+      <button type="button" class="secondary-button" (click)="previousPage()" [disabled]="currentPage <= 1 || isLoading">
+        ← Previous
+      </button>
+      <span class="pagination-info">
+        Page {{ currentPage }} of {{ totalPages || 1 }} ({{ totalCashBoxes }} total records)
+      </span>
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="nextPage()"
+        [disabled]="currentPage >= totalPages || isLoading || totalPages === 0"
+      >
+        Next →
+      </button>
+    </div>
   </article>
+
+  @if (isAddDialogOpen) {
+    <div class="dialog-overlay" (click)="closeAddDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Cashbox</p>
+            <h3>Add new payment</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeAddDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form dialog__form--two-columns" (ngSubmit)="createPayment()">
+          <label>
+            <span>Type</span>
+            <select [(ngModel)]="newPaymentForm.type" name="newType" required>
+              @for (itemType of cashBoxTypes; track itemType) {
+                <option [value]="itemType">{{ itemType }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Date</span>
+            <input type="date" [(ngModel)]="newPaymentForm.date" name="newDate" required />
+          </label>
+
+          <label>
+            <span>Category</span>
+            <input type="text" [(ngModel)]="newPaymentForm.category" name="newCategory" required />
+          </label>
+
+          <label>
+            <span>Payment</span>
+            <input type="number" step="0.01" [(ngModel)]="newPaymentForm.payment" name="newPayment" required />
+          </label>
+
+          <label>
+            <span>Payment Type</span>
+            <select [(ngModel)]="newPaymentForm.paymentType" name="newPaymentType" required>
+              @for (type of paymentTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Currency</span>
+            <input type="text" [(ngModel)]="newPaymentForm.currency" name="newCurrency" required />
+          </label>
+
+          <label class="dialog__field--full">
+            <span>Description</span>
+            <textarea [(ngModel)]="newPaymentForm.description" name="newDescription" required></textarea>
+          </label>
+
+          @if (formErrorMessage) {
+            <div class="dialog__field--full form-error">
+              {{ formErrorMessage }}
+            </div>
+          }
+
+          <div class="dialog__actions dialog__actions--full">
+            <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
+            <button type="submit" class="feature-page__action" [disabled]="isSubmitting">
+              {{ isSubmitting ? 'Creating...' : 'Create payment' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (isDetailsDialogOpen && selectedCashBox) {
+    <div class="dialog-overlay" (click)="closeDetailsDialog()">
+      <section class="dialog dialog--details" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Payment details</p>
+            <h3>{{ selectedCashBox.cashBoxCategory }}</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeDetailsDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        @if (!isEditingDetails) {
+          <dl class="details-grid">
+            <dt>ID</dt><dd>{{ selectedCashBox.cashBoxId }}</dd>
+            <dt>Type</dt><dd>{{ selectedCashBox.cashBoxType }}</dd>
+            <dt>Date</dt><dd>{{ selectedCashBox.cashBoxEntryDate | date: 'dd MMM yyyy' }}</dd>
+            <dt>Category</dt><dd>{{ selectedCashBox.cashBoxCategory }}</dd>
+            <dt>Description</dt><dd>{{ selectedCashBox.cashBoxDescription }}</dd>
+            <dt>Payment</dt><dd>{{ selectedCashBox.cashBoxPayment }}</dd>
+            <dt>Payment Type</dt><dd>{{ selectedCashBox.cashBoxPaymentType }}</dd>
+            <dt>Currency</dt><dd>{{ selectedCashBox.cashBoxCurrency | uppercase }}</dd>
+            <dt>Created By</dt><dd>{{ selectedCashBox.creator?.fullname || selectedCashBox.cashBoxCreatedBy }}</dd>
+            <dt>Created At</dt><dd>{{ selectedCashBox.cashBoxCreatedAt | date: 'dd MMM yyyy, HH:mm' }}</dd>
+            <dt>Updated At</dt><dd>{{ selectedCashBox.cashBoxUpdatedAt | date: 'dd MMM yyyy, HH:mm' }}</dd>
+          </dl>
+
+          <div class="dialog__actions">
+            <button type="button" class="secondary-button" (click)="closeDetailsDialog()">Close</button>
+            <button type="button" class="secondary-button" (click)="startEditDetails()">Edit payment</button>
+            <button type="button" class="danger-button" [disabled]="isDeleting" (click)="openDeleteDialogFromDetails()">
+              Delete payment
+            </button>
+          </div>
+        } @else {
+          <form class="dialog__form dialog__form--two-columns" (ngSubmit)="updatePayment()">
+            <label>
+              <span>Type</span>
+              <select [(ngModel)]="editPaymentForm.type" name="editType" required>
+                @for (itemType of cashBoxTypes; track itemType) {
+                  <option [value]="itemType">{{ itemType }}</option>
+                }
+              </select>
+            </label>
+
+            <label>
+              <span>Date</span>
+              <input type="date" [(ngModel)]="editPaymentForm.date" name="editDate" required />
+            </label>
+
+            <label>
+              <span>Category</span>
+              <input type="text" [(ngModel)]="editPaymentForm.category" name="editCategory" required />
+            </label>
+
+            <label>
+              <span>Payment</span>
+              <input type="number" step="0.01" [(ngModel)]="editPaymentForm.payment" name="editPayment" required />
+            </label>
+
+            <label>
+              <span>Payment Type</span>
+              <select [(ngModel)]="editPaymentForm.paymentType" name="editPaymentType" required>
+                @for (type of paymentTypes; track type) {
+                  <option [value]="type">{{ type }}</option>
+                }
+              </select>
+            </label>
+
+            <label>
+              <span>Currency</span>
+              <input type="text" [(ngModel)]="editPaymentForm.currency" name="editCurrency" required />
+            </label>
+
+            <label class="dialog__field--full">
+              <span>Description</span>
+              <textarea [(ngModel)]="editPaymentForm.description" name="editDescription" required></textarea>
+            </label>
+
+            @if (formErrorMessage) {
+              <div class="dialog__field--full form-error">
+                {{ formErrorMessage }}
+              </div>
+            }
+
+            <div class="dialog__actions dialog__actions--full">
+              <button type="button" class="secondary-button" (click)="cancelEditDetails()">Cancel edit</button>
+              <button type="submit" class="feature-page__action" [disabled]="isUpdating">
+                {{ isUpdating ? 'Saving...' : 'Save changes' }}
+              </button>
+            </div>
+          </form>
+        }
+      </section>
+    </div>
+  }
+
+  @if (isDeleteDialogOpen) {
+    <div class="dialog-overlay" (click)="closeDeleteDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Cashbox</p>
+            <h3>Delete payment</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeDeleteDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <p>{{ deleteDialogMessage }}</p>
+
+        <div class="dialog__actions">
+          <button type="button" class="secondary-button" [disabled]="isDeleting" (click)="closeDeleteDialog()">Cancel</button>
+          <button type="button" class="danger-button" [disabled]="isDeleting" (click)="confirmDeletePayment()">
+            {{ isDeleting ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
 </section>

@@ -26,7 +26,7 @@
     </div>
 
     <nav class="nav-list" aria-label="Dashboard sections">
-      @for (item of navItems; track item.path) {
+      @for (item of visibleNavItems; track item.path) {
         <a
           class="nav-item"
           [routerLink]="['/dashboard', item.path]"

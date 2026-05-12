@@ -20,6 +20,7 @@ interface SidebarNavItem {
   label: string;
   path: string;
   hint: string;
+  requiresSuperAdmin?: boolean;
 }
 
 @Component({
@@ -46,7 +47,7 @@ export class DashboardPageComponent {
   isSidebarOpen = false;
 
   get currentRole(): string {
-    return this.authState.getRole() ?? 'SUPERADMIN';
+    return this.authState.getRole() ?? 'UNKNOWN';
   }
 
 
@@ -56,11 +57,17 @@ export class DashboardPageComponent {
     // { icon: 'medication', label: 'Chronic Diseases', path: 'chronic-diseases', hint: 'Disease management' },
     { icon: 'event_available', label: 'Reservations', path: 'reservations', hint: 'Appointments' },
     { icon: 'coffee_maker', label: 'Doctor Availability', path: 'doctor-availability', hint: 'Availability' },
-    { icon: 'manage_accounts', label: 'Users', path: 'users', hint: 'Staff access' },
-    { icon: 'point_of_sale', label: 'Cashbox', path: 'cashbox', hint: 'Payments' },
+    { icon: 'manage_accounts', label: 'Users', path: 'users', hint: 'Staff access', requiresSuperAdmin: true },
+    { icon: 'point_of_sale', label: 'Cashbox', path: 'cashbox', hint: 'Payments', requiresSuperAdmin: true },
     { icon: 'medication', label: 'Whatsapp Notifications', path: 'whatsapp-notifications', hint: 'Message templates' },
     { icon: 'account_circle', label: 'Profile', path: 'profile', hint: 'Admin account' },
   ];
+
+  get visibleNavItems(): SidebarNavItem[] {
+    const isSuperAdmin = this.authState.getRole() === 'SUPERADMIN';
+
+    return this.navItems.filter((item) => !item.requiresSuperAdmin || isSuperAdmin);
+  }
 
   @HostListener('window:resize')
   onViewportResize(): void {
