@@ -33,7 +33,7 @@
         <input
           id="availability-search"
           type="text"
-          placeholder="Doctor ID, day, time"
+          placeholder="Doctor name, day, time"
           [(ngModel)]="quickSearch"
         />
       </div>
@@ -56,7 +56,7 @@
         <table class="availability-table">
           <thead>
             <tr>
-              <th>Doctor ID</th>
+              <th>Doctor Name</th>
               <th>Reservation Days</th>
               <th>Start Time</th>
               <th>End Time</th>
@@ -73,7 +73,7 @@
 
             @for (record of filteredAvailabilities; track record.id) {
               <tr>
-                <td><span class="doctor-id">{{ record.userId }}</span></td>
+                <td><span class="">{{ getUserName(record.userId) }}</span></td>
                 <td>
                   <div class="day-chips">
                     @for (day of record.reservationDays; track day) {
@@ -128,8 +128,13 @@
 
         <form class="dialog__form" (ngSubmit)="createAvailability()">
           <label>
-            <span>Doctor User ID</span>
-            <input type="text" [(ngModel)]="createForm.userId" name="newUserId" placeholder="UUID" required />
+            <span>Doctor</span>
+            <select [(ngModel)]="createForm.userId" name="newUserId" required>
+              <option value="">Select a doctor</option>
+              @for (user of users; track user.id) {
+                <option [value]="user.id">{{ user.fullname }}</option>
+              }
+            </select>
           </label>
 
           <label>
@@ -187,7 +192,7 @@
         </header>
 
         <dl class="details-grid">
-          <dt>Doctor ID</dt><dd>{{ selectedAvailability.userId }}</dd>
+          <dt>Doctor Name</dt><dd>{{ getUserName(selectedAvailability.userId) }}</dd>
           <dt>Reservation Days</dt>
           <dd>
             <div class="day-chips">
@@ -250,10 +255,10 @@
         </header>
 
         <form class="dialog__form" (ngSubmit)="updateAvailability()">
-          <label>
-            <span>Doctor User ID</span>
-            <input type="text" [(ngModel)]="editForm.userId" name="editUserId" placeholder="UUID" required />
-          </label>
+          <div class="form-field-readonly">
+            <span class="form-field-readonly__label">Doctor</span>
+            <div class="form-field-readonly__value">{{ getUserName(editForm.userId) }}</div>
+          </div>
 
           <label>
             <span>Start Time</span>

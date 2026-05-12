@@ -29,7 +29,8 @@
 }
 
 .availability-toolbar__search input,
-.dialog__form input {
+.dialog__form input,
+.dialog__form select {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 14px;
   padding: 11px 13px;
@@ -44,9 +45,20 @@
 }
 
 .availability-toolbar__search input:focus,
-.dialog__form input:focus {
+.dialog__form input:focus,
+.dialog__form select:focus {
   border-color: rgba(131, 180, 255, 0.52);
   box-shadow: 0 0 0 4px rgba(112, 170, 255, 0.16);
+}
+
+.dialog__form select {
+  font-size: 0.94rem;
+  cursor: pointer;
+}
+
+.dialog__form select option {
+  background: rgba(13, 23, 40, 0.96);
+  color: #eaf3ff;
 }
 
 .secondary-button,
@@ -155,7 +167,7 @@
   padding: 5px 8px;
   border-radius: 999px;
   border: 1px solid rgba(126, 188, 255, 0.4);
-  background: rgba(126, 188, 255, 0.14);
+  background: rgb(228, 232, 1);
   color: #dbeafd;
 }
 
@@ -322,6 +334,29 @@
   letter-spacing: 0.08em;
 }
 
+.form-field-readonly {
+  display: grid;
+  gap: 8px;
+}
+
+.form-field-readonly__label {
+  margin: 0;
+  color: #a7c0e3;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.form-field-readonly__value {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 11px 13px;
+  background: rgba(255, 255, 255, 0.02);
+  color: #dce8ff;
+  font-size: 0.94rem;
+}
+
 .day-picker {
   margin-top: 4px;
   border-radius: 14px;
@@ -437,8 +472,19 @@
   color: #5b78a9;
 }
 
+:host-context(.theme-light) .form-field-readonly__label {
+  color: #5b78a9;
+}
+
+:host-context(.theme-light) .form-field-readonly__value {
+  background: rgba(238, 246, 255, 0.5);
+  border-color: rgba(110, 144, 196, 0.28);
+  color: #224167;
+}
+
 :host-context(.theme-light) .availability-toolbar__search input,
 :host-context(.theme-light) .dialog__form input,
+:host-context(.theme-light) .dialog__form select,
 :host-context(.theme-light) .secondary-button,
 :host-context(.theme-light) .icon-button,
 :host-context(.theme-light) .icon-close,
@@ -451,6 +497,11 @@
 :host-context(.theme-light) .day-picker {
   background: rgba(126, 188, 255, 0.12);
   border-color: rgba(110, 144, 196, 0.3);
+}
+
+:host-context(.theme-light) .dialog__form select option {
+  background: #f8fcff;
+  color: #224167;
 }
 
 :host-context(.theme-light) .day-picker__chip--active {

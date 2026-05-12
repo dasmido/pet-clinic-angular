@@ -7,6 +7,7 @@ import {
   DoctorAvailabilityRecord,
   ReservationDay,
 } from '../../services/doctor-availability-api.service';
+import { UserApiService, User } from '../../services/user-api.service';
 
 interface AvailabilityForm {
   id?: string;
@@ -26,6 +27,7 @@ interface AvailabilityForm {
 export class DoctorAvailabilityPageComponent implements OnInit {
   constructor(
     private availabilityApi: DoctorAvailabilityApiService,
+    private userApi: UserApiService,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone
   ) {}
@@ -46,6 +48,7 @@ export class DoctorAvailabilityPageComponent implements OnInit {
     'SATURDAY',
   ];
 
+  users: User[] = [];
   availabilities: DoctorAvailabilityRecord[] = [];
   currentPage = 1;
   perPage = 10;
@@ -67,6 +70,7 @@ export class DoctorAvailabilityPageComponent implements OnInit {
   editForm: AvailabilityForm = this.getDefaultForm();
 
   ngOnInit(): void {
+    this.loadUsers();
     this.loadAvailability();
   }
 
@@ -81,13 +85,37 @@ export class DoctorAvailabilityPageComponent implements OnInit {
 
     const search = this.quickSearch.trim().toLowerCase();
     return this.availabilities.filter((item) => {
+      const userName = this.getUserName(item.userId).toLowerCase();
       const days = item.reservationDays.join(' ').toLowerCase();
       return (
-        item.userId.toLowerCase().includes(search)
+        userName.includes(search)
+        || item.userId.toLowerCase().includes(search)
         || days.includes(search)
         || item.startTime.toLowerCase().includes(search)
         || item.endTime.toLowerCase().includes(search)
       );
+    });
+  }
+
+  getUserName(userId: string): string {
+    const user = this.users.find((u) => u.id === userId);
+    return user ? user.fullname : 'Unknown';
+  }
+
+  loadUsers(): void {
+    this.userApi.getUsersList(1, 100).subscribe({
+      next: (response) => {
+        this.ngZone.run(() => {
+          this.users = response.data.data;
+          this.cdr.markForCheck();
+        });
+      },
+      error: (error) => {
+        this.ngZone.run(() => {
+          console.error('Error loading users:', error);
+          this.cdr.markForCheck();
+        });
+      },
     });
   }
 
@@ -166,7 +194,7 @@ export class DoctorAvailabilityPageComponent implements OnInit {
   createAvailability(): void {
     const userId = this.createForm.userId.trim();
     if (!userId) {
-      this.errorMessage = 'Doctor user ID is required.';
+      this.errorMessage = 'Please select a doctor.';
       return;
     }
     if (this.createForm.reservationDays.length === 0) {
@@ -209,7 +237,7 @@ export class DoctorAvailabilityPageComponent implements OnInit {
       return;
     }
     if (!userId) {
-      this.errorMessage = 'Doctor user ID is required.';
+      this.errorMessage = 'Please select a doctor.';
       return;
     }
     if (this.editForm.reservationDays.length === 0) {
