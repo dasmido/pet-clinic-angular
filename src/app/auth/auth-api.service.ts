@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-export type AuthRole = 'SUPERADMIN' | 'ADMIN' | 'DOCTOR' | 'RECEPTIONIST' | 'USER';
+export type AuthRole = 'SUPERADMIN' | 'ADMIN' | 'DOCTOR' | 'LAB' | 'NURSE' | 'PATIENT' | 'RECIPIENT';
 
 export interface LoginRequest {
   username: string;

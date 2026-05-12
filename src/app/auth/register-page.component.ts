@@ -23,7 +23,7 @@ export class RegisterPageComponent {
   errorMessage = '';
   responseText = '';
 
-  readonly roles: AuthRole[] = ['SUPERADMIN', 'ADMIN', 'DOCTOR', 'RECEPTIONIST', 'USER'];
+  readonly roles: AuthRole[] = ['SUPERADMIN', 'ADMIN', 'DOCTOR', 'LAB', 'NURSE', 'PATIENT', 'RECIPIENT'];
 
   readonly form = this.formBuilder.nonNullable.group({
     username: ['', [Validators.required, Validators.minLength(3)]],

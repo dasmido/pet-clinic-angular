@@ -9,7 +9,7 @@
   background:
     radial-gradient(circle at top right, rgba(255, 191, 120, 0.18), transparent 30%),
     radial-gradient(circle at left center, rgba(118, 189, 255, 0.16), transparent 34%),
-    linear-gradient(160deg, #100b19 0%, #1d132d 50%, #22163c 100%);
+    linear-gradient(160deg, #100b19 0%, #240d38 50%, #310940 100%);
   color: #fff6fb;
 }
 
@@ -218,7 +218,8 @@
   border: none;
   border-radius: 16px;
   padding: 15px 18px;
-  background: linear-gradient(135deg, #ffc085 0%, #d895ff 100%);
+  /*background: linear-gradient(135deg, #ffc085 0%, #d895ff 100%);*/
+  background-color: #1d8f56;
   color: #1a0d29;
   font-size: 1rem;
   font-weight: 800;
