@@ -1,14 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
 
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
+
 @Component({
   selector: 'app-confirm-delete-dialog',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FontAwesomeModule],
   templateUrl: './confirm-delete-dialog.component.html',
   styleUrls: ['./confirm-delete-dialog.component.css'],
 })
 export class ConfirmDeleteDialogComponent {
+  readonly faTrashCan = faTrashCan;
+
   @Input() isOpen = false;
   @Input() title = 'Delete item';
   @Input() message = 'Are you sure you want to delete this item?';

@@ -2,6 +2,18 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, HostListener, NgZone, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import {
+  faChevronLeft,
+  faChevronRight,
+  faCircleInfo,
+  faPenToSquare,
+  faPlus,
+  faRotateRight,
+  faTrashCan,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
+
 import {
   DoctorAvailabilityApiService,
   DoctorAvailabilityRecord,
@@ -20,11 +32,20 @@ interface AvailabilityForm {
 @Component({
   selector: 'app-doctor-availability-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FontAwesomeModule],
   templateUrl: './doctor-availability-page.component.html',
   styleUrls: ['./doctor-availability-page.component.css'],
 })
 export class DoctorAvailabilityPageComponent implements OnInit {
+  readonly faPlus = faPlus;
+  readonly faRotateRight = faRotateRight;
+  readonly faCircleInfo = faCircleInfo;
+  readonly faPenToSquare = faPenToSquare;
+  readonly faTrashCan = faTrashCan;
+  readonly faXmark = faXmark;
+  readonly faChevronLeft = faChevronLeft;
+  readonly faChevronRight = faChevronRight;
+
   constructor(
     private availabilityApi: DoctorAvailabilityApiService,
     private userApi: UserApiService,

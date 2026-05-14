@@ -12,6 +12,7 @@
           {{ cancelText }}
         </button>
         <button type="button" class="danger-button" [disabled]="isProcessing" (click)="onConfirm()">
+          <fa-icon [icon]="faTrashCan" class="button-icon" aria-hidden="true"></fa-icon>
           {{ isProcessing ? 'Deleting...' : confirmText }}
         </button>
       </div>
