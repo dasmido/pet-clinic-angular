@@ -658,6 +658,13 @@ export class ReservationsPageComponent implements OnInit {
     return item.id;
   }
 
+  getStageClass(stage: string | string[]): string {
+    const s = Array.isArray(stage) ? stage[0] : stage;
+    if (s === 'RECEPTION_STAGE') return 'appt-stage-badge--reception';
+    if (s === 'LAB_STAGE') return 'appt-stage-badge--lab';
+    return 'appt-stage-badge--doctor';
+  }
+
   getStageDisplay(stage: string | string[] | undefined): string {
     if (!stage) return 'N/A';
     return Array.isArray(stage) ? stage.join(', ') : stage;

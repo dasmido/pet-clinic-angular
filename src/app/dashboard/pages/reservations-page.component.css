@@ -125,3 +125,308 @@
   background-color: #007bff;
   font-weight: bold;
 }
+
+/* ================================================================
+   Appointment Details Dialog
+   ================================================================ */
+
+.appt-dialog {
+  position: relative;
+  width: 90vw;
+  height: 90vh;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 0;
+  background: linear-gradient(160deg, rgba(10, 18, 32, 0.99), rgba(14, 24, 42, 0.98));
+  border: none;
+  box-shadow: none;
+  backdrop-filter: blur(24px);
+  display: flex;
+  flex-direction: column;
+}
+
+.appt-dialog__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #a7bbdd;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 140ms, color 140ms;
+  z-index: 2;
+}
+
+.appt-dialog__close:hover {
+  background: rgba(255, 255, 255, 0.13);
+  color: #fff;
+}
+
+/* Hero */
+.appt-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(135deg, rgba(12, 21, 37, 0.96), rgba(18, 28, 48, 0.9));
+}
+
+.appt-avatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7ebcff 0%, #5f7ffd 100%);
+  color: #08111f;
+  font-size: 28px;
+  font-weight: 800;
+  box-shadow: 0 8px 24px rgba(94, 124, 255, 0.35);
+}
+
+.appt-hero__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.appt-hero__eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #7ebcff;
+}
+
+.appt-hero__name {
+  margin: 0 0 4px;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.appt-hero__sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #8ea7d2;
+}
+
+/* Stage badge */
+.appt-stage-badge {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid transparent;
+  margin-right: 44px;
+}
+
+.appt-stage-badge--doctor {
+  background: rgba(94, 124, 255, 0.15);
+  border-color: rgba(94, 124, 255, 0.35);
+  color: #9db8ff;
+}
+
+.appt-stage-badge--reception {
+  background: rgba(74, 225, 155, 0.12);
+  border-color: rgba(74, 225, 155, 0.3);
+  color: #6ee7a8;
+}
+
+.appt-stage-badge--lab {
+  background: rgba(200, 130, 255, 0.12);
+  border-color: rgba(200, 130, 255, 0.3);
+  color: #d4a1ff;
+}
+
+/* Sections grid */
+.appt-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  flex: 1;
+}
+
+.appt-section {
+  padding: 24px 28px;
+  background: rgba(8, 15, 27, 0.72);
+}
+
+.appt-section__header {
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.appt-section__header h4 {
+  margin: 0 0 4px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.appt-section__header p {
+  margin: 0;
+  font-size: 0.77rem;
+  color: #8ea7d2;
+}
+
+/* Info items */
+.appt-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 16px;
+}
+
+.appt-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.appt-info-item--full {
+  grid-column: 1 / -1;
+}
+
+.appt-info-item label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6e8fb8;
+}
+
+.appt-info-item span {
+  font-size: 0.92rem;
+  color: #ddeeff;
+  word-break: break-word;
+}
+
+.appt-info-item__mono {
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem !important;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: #a7bbdd !important;
+}
+
+/* Payment strip */
+.appt-payment {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding: 18px 28px;
+  background: rgba(94, 124, 255, 0.07);
+  border-top: 1px solid rgba(94, 124, 255, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.appt-payment__amount {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #7ebcff !important;
+}
+
+/* Dialog footer */
+.appt-dialog__footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 28px;
+  justify-content: flex-end;
+}
+
+/* Light theme */
+:host-context(.theme-light) .appt-dialog {
+  background: linear-gradient(160deg, rgba(246, 249, 255, 0.99), rgba(237, 244, 255, 0.98));
+  border: none;
+  box-shadow: none;
+}
+
+:host-context(.theme-light) .appt-dialog__close {
+  border-color: rgba(113, 152, 205, 0.3);
+  background: rgba(113, 152, 205, 0.08);
+  color: #5779a8;
+}
+
+:host-context(.theme-light) .appt-dialog__close:hover {
+  background: rgba(113, 152, 205, 0.18);
+  color: #2a4a7f;
+}
+
+:host-context(.theme-light) .appt-hero {
+  background: linear-gradient(135deg, rgba(226, 238, 255, 0.96), rgba(215, 230, 255, 0.9));
+}
+
+:host-context(.theme-light) .appt-hero__eyebrow { color: #3d6fb0; }
+:host-context(.theme-light) .appt-hero__name { color: #1a3057; }
+:host-context(.theme-light) .appt-hero__sub { color: #5779a8; }
+
+:host-context(.theme-light) .appt-grid {
+  background: rgba(113, 152, 205, 0.12);
+}
+
+:host-context(.theme-light) .appt-section {
+  background: rgba(246, 249, 255, 0.95);
+}
+
+:host-context(.theme-light) .appt-section__header h4 { color: #1a3057; }
+:host-context(.theme-light) .appt-section__header p { color: #5779a8; }
+:host-context(.theme-light) .appt-info-item label { color: #7090b8; }
+:host-context(.theme-light) .appt-info-item span { color: #23456c; }
+
+:host-context(.theme-light) .appt-info-item__mono {
+  background: rgba(113, 152, 205, 0.1);
+  border-color: rgba(113, 152, 205, 0.2);
+  color: #4a6a95 !important;
+}
+
+:host-context(.theme-light) .appt-payment {
+  background: rgba(94, 124, 255, 0.05);
+  border-color: rgba(94, 124, 255, 0.2);
+}
+
+:host-context(.theme-light) .appt-payment__amount { color: #2a5abf !important; }
+
+@media (max-width: 900px) {
+  .appt-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .appt-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .appt-hero {
+    flex-wrap: wrap;
+  }
+
+  .appt-stage-badge {
+    margin-right: 0;
+  }
+}

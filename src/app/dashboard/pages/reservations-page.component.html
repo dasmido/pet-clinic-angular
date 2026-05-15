@@ -343,54 +343,161 @@
     </div>
   }
 
-  @if (isDetailsDialogOpen) {
+  @if (isDetailsDialogOpen && selectedAppointment) {
     <div class="dialog-overlay" (click)="closeDetailsDialog()">
-      <section class="dialog dialog--large" (click)="$event.stopPropagation()">
-        <header class="dialog__header">
-          <h3>Appointment Details</h3>
-          <button type="button" class="icon-close" (click)="closeDetailsDialog()">X</button>
-        </header>
-        <div class="dialog__content">
-          <p><strong>Appointment ID:</strong> {{ selectedAppointment?.id }}</p>
-          <p><strong>Patient:</strong> {{ selectedAppointment?.patient?.fullname }}</p>
-          <p><strong>Gender:</strong> {{ selectedAppointment?.patient?.gender }}</p>
-          <p><strong>Birth Date:</strong> {{ selectedAppointment?.patient?.birthDate | date: 'dd MMM yyyy' }}</p>
-          <p><strong>Doctor:</strong> {{ selectedAppointment?.doctor?.fullname }}</p>
-          <p><strong>Date:</strong> {{ selectedAppointment?.appointmentDate | date: 'dd MMM yyyy' }}</p>
-          <p><strong>Stage:</strong> <span class="stage-tag">{{ getStageDisplay(selectedAppointment?.stage) }}</span></p>
-          <p><strong>Reception Note:</strong> {{ selectedAppointment?.receptionNote || 'N/A' }}</p>
-          <p><strong>Blood Pressure (BP):</strong> {{ selectedAppointment?.bp || 'N/A' }}</p>
-          <p><strong>Chief Complaint:</strong> {{ selectedAppointment?.chiefComplaint || 'N/A' }}</p>
-          <p><strong>Doctor Treatment:</strong> {{ selectedAppointment?.doctorTreatment || 'N/A' }}</p>
-          <p><strong>ECG:</strong> {{ selectedAppointment?.ecg || 'N/A' }}</p>
-          <p><strong>End Time:</strong> {{ selectedAppointment?.endTime || 'N/A' }}</p>
-          <p><strong>Lab Result:</strong> {{ selectedAppointment?.labResult || 'N/A' }}</p>
-          <p><strong>Others:</strong> {{ selectedAppointment?.others || 'N/A' }}</p>
-          <p><strong>Pulse:</strong> {{ selectedAppointment?.pulse || 'N/A' }}</p>
-          <p><strong>Respiratory Rate (RR):</strong> {{ selectedAppointment?.rr || 'N/A' }}</p>
-          <p><strong>Temperature:</strong> {{ selectedAppointment?.temperature || 'N/A' }}</p>
-          <p><strong>Created At:</strong> {{ selectedAppointment?.createdAt | date: 'dd MMM yyyy, HH:mm' }}</p>
+      <article class="appt-dialog" (click)="$event.stopPropagation()">
+
+        <button type="button" class="appt-dialog__close" (click)="closeDetailsDialog()" aria-label="Close">✕</button>
+
+        <!-- Hero strip -->
+        <div class="appt-hero">
+          <div class="appt-avatar">
+            {{ selectedAppointment.patient?.fullname?.charAt(0)?.toUpperCase() || 'A' }}
+          </div>
+          <div class="appt-hero__info">
+            <p class="appt-hero__eyebrow">Appointment Record</p>
+            <h3 class="appt-hero__name">{{ selectedAppointment.patient?.fullname || '—' }}</h3>
+            @if (selectedAppointment.patient?.cardNo) {
+              <p class="appt-hero__sub">Card #{{ selectedAppointment.patient?.cardNo }}</p>
+            }
+          </div>
+          <span class="appt-stage-badge" [ngClass]="getStageClass(selectedAppointment.stage)">
+            {{ getStageDisplay(selectedAppointment.stage) }}
+          </span>
         </div>
-        <footer class="dialog__actions">
+
+        <!-- Sections grid -->
+        <div class="appt-grid">
+
+          <section class="appt-section">
+            <div class="appt-section__header">
+              <h4>Patient</h4>
+              <p>Personal information</p>
+            </div>
+            <div class="appt-info-grid">
+              <div class="appt-info-item">
+                <label>Full Name</label>
+                <span>{{ selectedAppointment.patient?.fullname || '—' }}</span>
+              </div>
+              <div class="appt-info-item">
+                <label>Gender</label>
+                <span>{{ selectedAppointment.patient?.gender || '—' }}</span>
+              </div>
+              <div class="appt-info-item">
+                <label>Birth Date</label>
+                <span>{{ (selectedAppointment.patient?.birthDate | date: 'dd MMM yyyy') || '—' }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="appt-section">
+            <div class="appt-section__header">
+              <h4>Appointment</h4>
+              <p>Scheduling details</p>
+            </div>
+            <div class="appt-info-grid">
+              <div class="appt-info-item">
+                <label>Date</label>
+                <span>{{ selectedAppointment.appointmentDate | date: 'dd MMM yyyy' }}</span>
+              </div>
+              <div class="appt-info-item">
+                <label>Doctor</label>
+                <span>{{ selectedAppointment.doctor?.fullname || '—' }}</span>
+              </div>
+              <div class="appt-info-item">
+                <label>End Time</label>
+                <span>{{ selectedAppointment.endTime || '—' }}</span>
+              </div>
+              <div class="appt-info-item appt-info-item--full">
+                <label>Record ID</label>
+                <span class="appt-info-item__mono">{{ selectedAppointment.id }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="appt-section">
+            <div class="appt-section__header">
+              <h4>Vitals</h4>
+              <p>Clinical measurements</p>
+            </div>
+            <div class="appt-info-grid">
+              <div class="appt-info-item">
+                <label>Blood Pressure</label>
+                <span>{{ selectedAppointment.bp || '—' }}</span>
+              </div>
+              <div class="appt-info-item">
+                <label>Pulse</label>
+                <span>{{ selectedAppointment.pulse || '—' }}</span>
+              </div>
+              <div class="appt-info-item">
+                <label>Resp. Rate</label>
+                <span>{{ selectedAppointment.rr || '—' }}</span>
+              </div>
+              <div class="appt-info-item">
+                <label>Temperature</label>
+                <span>{{ selectedAppointment.temperature || '—' }}</span>
+              </div>
+              <div class="appt-info-item">
+                <label>ECG</label>
+                <span>{{ selectedAppointment.ecg || '—' }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="appt-section">
+            <div class="appt-section__header">
+              <h4>Clinical Notes</h4>
+              <p>Observations and treatment</p>
+            </div>
+            <div class="appt-info-grid">
+              <div class="appt-info-item appt-info-item--full">
+                <label>Chief Complaint</label>
+                <span>{{ selectedAppointment.chiefComplaint || '—' }}</span>
+              </div>
+              <div class="appt-info-item appt-info-item--full">
+                <label>Doctor Treatment</label>
+                <span>{{ selectedAppointment.doctorTreatment || '—' }}</span>
+              </div>
+              <div class="appt-info-item appt-info-item--full">
+                <label>Reception Note</label>
+                <span>{{ selectedAppointment.receptionNote || '—' }}</span>
+              </div>
+              <div class="appt-info-item appt-info-item--full">
+                <label>Lab Result</label>
+                <span>{{ selectedAppointment.labResult || '—' }}</span>
+              </div>
+              <div class="appt-info-item appt-info-item--full">
+                <label>Others</label>
+                <span>{{ selectedAppointment.others || '—' }}</span>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Payment strip -->
+        <div class="appt-payment">
+          <div class="appt-info-item">
+            <label>Payment</label>
+            <span class="appt-payment__amount">{{ selectedAppointment.payment ?? '—' }} {{ selectedAppointment.currency }}</span>
+          </div>
+          <div class="appt-info-item">
+            <label>Payment Type</label>
+            <span>{{ selectedAppointment.paymentType || '—' }}</span>
+          </div>
+          <div class="appt-info-item">
+            <label>Created</label>
+            <span>{{ selectedAppointment.createdAt | date: 'dd MMM yyyy, HH:mm' }}</span>
+          </div>
+        </div>
+
+        <footer class="appt-dialog__footer">
           <button type="button" class="secondary-button" (click)="closeDetailsDialog()">Close</button>
-          <button
-            *ngIf="selectedAppointment"
-            type="button"
-            class="feature-page__action"
-            (click)="openEditDialog(selectedAppointment)"
-          >
-            Edit
-          </button>
-          <button
-            *ngIf="selectedAppointment"
-            type="button"
-            class="danger-button"
-            (click)="openDeleteDialog(selectedAppointment)"
-          >
-            Delete
-          </button>
+          <button type="button" class="feature-page__action" (click)="openEditDialog(selectedAppointment)">Edit</button>
+          <button type="button" class="danger-button" (click)="openDeleteDialog(selectedAppointment)">Delete</button>
         </footer>
-      </section>
+
+      </article>
     </div>
   }
 
