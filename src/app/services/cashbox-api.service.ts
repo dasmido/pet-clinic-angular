@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { AuthStateService } from '../auth/auth-state.service';
+import { environment } from '../../environments/environment';
 
 export type CashBoxType = 'CASH_IN' | 'CASH_OUT';
 export type CashBoxPaymentType = 'CASH' | 'TRANSFER' | 'CARD';
@@ -67,7 +68,7 @@ export interface UpdateCashBoxPayload {
   providedIn: 'root',
 })
 export class CashboxApiService {
-  private readonly API_BASE = 'http://localhost:4010/api/v1/cash-box';
+  private readonly API_BASE = `${environment.apiBaseUrl}/cash-box`;
 
   constructor(
     private readonly http: HttpClient,

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthStateService } from '../auth/auth-state.service';
+import { environment } from '../../environments/environment';
 
 export interface UserProfile {
   id: string;
@@ -19,7 +20,7 @@ export interface UserProfileResponse {
 
 @Injectable({ providedIn: 'root' })
 export class UserProfileApiService {
-  private readonly baseUrl = 'http://localhost:4010/api/v1/users';
+  private readonly baseUrl = `${environment.apiBaseUrl}/users`;
 
   constructor(
     private readonly http: HttpClient,

@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { AuthStateService } from '../auth/auth-state.service';
+import { environment } from '../../environments/environment';
 
 export type AppointmentStage = 'DOCTOR_STAGE' | 'RECEPTION_STAGE' | 'LAB_STAGE';
 export type AppointmentPaymentType = 'CASH' | 'CARD' | 'BANK_TRANSFER';
@@ -97,7 +98,7 @@ export interface DeleteAppointmentPayload {
   providedIn: 'root',
 })
 export class AppointmentApiService {
-  private readonly API_BASE = 'http://localhost:4010/api/v1';
+  private readonly API_BASE = environment.apiBaseUrl;
 
   constructor(
     private readonly http: HttpClient,

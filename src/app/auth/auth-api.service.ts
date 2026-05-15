@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export type AuthRole = 'SUPERADMIN' | 'ADMIN' | 'DOCTOR' | 'LAB' | 'NURSE' | 'PATIENT' | 'RECIPIENT';
 
@@ -29,7 +30,7 @@ export interface AuthResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
-  private readonly baseUrl = 'http://localhost:4010/api/v1/auth';
+  private readonly baseUrl = `${environment.apiBaseUrl}/auth`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -69,7 +70,7 @@ export function extractAuthErrorMessage(error: unknown, fallbackMessage: string)
   }
 
   if (maybeError.status === 0) {
-    return 'Unable to reach the auth service. Check that the backend is running on localhost:4010 and allows CORS.';
+    return 'Unable to reach the auth service. Check that the backend is running and allows CORS.';
   }
 
   return fallbackMessage;

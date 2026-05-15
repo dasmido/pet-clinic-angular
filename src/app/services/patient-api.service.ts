@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthStateService } from '../auth/auth-state.service';
+import { environment } from '../../environments/environment';
 
 export interface Patient {
   id: string;
@@ -69,7 +70,7 @@ export interface CreatePatientResponse {
   providedIn: 'root'
 })
 export class PatientApiService {
-  private readonly API_BASE = 'http://localhost:4010/api/v1';
+  private readonly API_BASE = environment.apiBaseUrl;
 
   constructor(
     private http: HttpClient,
