@@ -362,6 +362,7 @@ export class ReservationsPageComponent implements OnInit {
   }
 
   openEditDialog(appointment: Appointment): void {
+    this.isDetailsDialogOpen = false; // Hide details without clearing selectedAppointment
     this.selectedAppointment = appointment;
     this.editReservationForm = {
       id: appointment.id,
@@ -379,7 +380,11 @@ export class ReservationsPageComponent implements OnInit {
     }
 
     this.isEditDialogOpen = false;
-    this.selectedAppointment = null;
+
+    // Return to details dialog if we came from there
+    if (this.selectedAppointment) {
+      this.isDetailsDialogOpen = true;
+    }
   }
 
   updateReservation(): void {
@@ -418,6 +423,7 @@ export class ReservationsPageComponent implements OnInit {
   }
 
   openDeleteDialog(appointment: Appointment): void {
+    this.isDetailsDialogOpen = false; // Hide details without clearing selectedAppointment
     if (this.isDeleting || this.isLoading) {
       return;
     }
@@ -431,8 +437,13 @@ export class ReservationsPageComponent implements OnInit {
       return;
     }
 
-    this.pendingDeleteAppointment = null;
     this.isDeleteDialogOpen = false;
+    this.pendingDeleteAppointment = null;
+
+    // Return to details dialog if we came from there
+    if (this.selectedAppointment) {
+      this.isDetailsDialogOpen = true;
+    }
   }
 
   confirmDeleteReservation(): void {

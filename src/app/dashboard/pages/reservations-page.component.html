@@ -373,8 +373,25 @@
         </div>
         <footer class="dialog__actions">
           <button type="button" class="secondary-button" (click)="closeDetailsDialog()">Close</button>
+          <button
+            *ngIf="selectedAppointment"
+            type="button"
+            class="feature-page__action"
+            (click)="openEditDialog(selectedAppointment)"
+          >
+            Edit
+          </button>
+          <button
+            *ngIf="selectedAppointment"
+            type="button"
+            class="danger-button"
+            (click)="openDeleteDialog(selectedAppointment)"
+          >
+            Delete
+          </button>
         </footer>
       </section>
     </div>
   }
+
 </section>
