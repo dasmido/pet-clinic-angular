@@ -62,12 +62,15 @@ export class AuthStateService {
         if (
           typeof parsedSession.token === 'string' &&
           typeof parsedSession.refreshToken === 'string' &&
-          typeof parsedSession.roles === 'string'
+          parsedSession.roles != null
         ) {
+          const roles = (Array.isArray(parsedSession.roles)
+            ? parsedSession.roles[0]
+            : parsedSession.roles) as AuthSession['roles'];
           return {
             token: parsedSession.token,
             refreshToken: parsedSession.refreshToken,
-            roles: parsedSession.roles as AuthSession['roles'],
+            roles,
           };
         }
       } catch {

@@ -297,53 +297,283 @@
 
   @if (isDetailsDialogOpen && selectedPatient) {
     <div class="dialog-overlay" (click)="closeDetailsDialog()">
-      <section class="dialog dialog--details" (click)="$event.stopPropagation()">
-        <header class="dialog__header">
-          <div>
-            <p>Patient details</p>
-            <h3>{{ selectedPatient.fullname }}</h3>
+      <article class="ptnt-dialog" (click)="$event.stopPropagation()">
+
+        <button type="button" class="ptnt-dialog__close" (click)="closeDetailsDialog()" aria-label="Close">✕</button>
+
+        <!-- Hero strip -->
+        <div class="ptnt-hero">
+          <div class="ptnt-avatar">
+            {{ selectedPatient.fullname.charAt(0).toUpperCase() }}
           </div>
-          <button type="button" class="icon-close" (click)="closeDetailsDialog()" aria-label="Close">
-            X
-          </button>
-        </header>
+          <div class="ptnt-hero__info">
+            <p class="ptnt-hero__eyebrow">Patient Record</p>
+            <h3 class="ptnt-hero__name">{{ selectedPatient.fullname }}</h3>
+            <p class="ptnt-hero__sub">Card #{{ selectedPatient.cardNo }}</p>
+          </div>
+          <span class="ptnt-gender-badge" [ngClass]="selectedPatient.gender === 'FEMALE' ? 'ptnt-gender-badge--female' : 'ptnt-gender-badge--male'">
+            {{ selectedPatient.gender }}
+          </span>
+        </div>
 
-        <dl class="details-grid">
-          <dt>Card number</dt><dd>{{ selectedPatient.cardNo }}</dd>
-          <dt>Birth date</dt><dd>{{ selectedPatient.birthDate | date: 'dd MMM yyyy' }}</dd>
-          <dt>Gender</dt><dd>{{ selectedPatient.gender }}</dd>
-          <dt>Marital status</dt><dd>{{ selectedPatient.maritalStatus }}</dd>
-          <dt>Emergency contact</dt><dd>{{ selectedPatient.emergencyContact || 'N/A' }}</dd>
-          <dt>Emergency phone</dt><dd>{{ selectedPatient.emergencyPhone || 'N/A' }}</dd>
-          <dt>Emergency relation</dt><dd>{{ selectedPatient.emergencyRelation || 'N/A' }}</dd>
-          <dt>Allergies</dt><dd>{{ selectedPatient.allergies || 'None' }}</dd>
-          <dt>Created at</dt><dd>{{ selectedPatient.createdAt | date: 'dd MMM yyyy, HH:mm' }}</dd>
-          <dt>Updated at</dt><dd>{{ selectedPatient.updatedAt | date: 'dd MMM yyyy, HH:mm' }}</dd>
-        </dl>
+        <!-- Sections grid -->
+        <div class="ptnt-grid">
 
-        <section class="details-chronic">
-          <header class="details-chronic__header">
-            <p>Chronic diseases</p>
-            <small>{{ selectedPatientChronicDiseases.length }} records</small>
-          </header>
+          <section class="ptnt-section">
+            <div class="ptnt-section__header">
+              <h4>Personal</h4>
+              <p>Basic information</p>
+            </div>
+            <div class="ptnt-info-grid">
+              <div class="ptnt-info-item">
+                <label>Birth Date</label>
+                <span>{{ selectedPatient.birthDate | date: 'dd MMM yyyy' }}</span>
+              </div>
+              <div class="ptnt-info-item">
+                <label>Gender</label>
+                <span>{{ selectedPatient.gender || '—' }}</span>
+              </div>
+              <div class="ptnt-info-item">
+                <label>Marital Status</label>
+                <span>{{ selectedPatient.maritalStatus || '—' }}</span>
+              </div>
+              <div class="ptnt-info-item ptnt-info-item--full">
+                <label>Allergies</label>
+                <span>{{ selectedPatient.allergies || 'None recorded' }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="ptnt-section">
+            <div class="ptnt-section__header">
+              <h4>Emergency</h4>
+              <p>Contact in emergencies</p>
+            </div>
+            <div class="ptnt-info-grid">
+              <div class="ptnt-info-item">
+                <label>Contact Name</label>
+                <span>{{ selectedPatient.emergencyContact || '—' }}</span>
+              </div>
+              <div class="ptnt-info-item">
+                <label>Phone</label>
+                <span>{{ selectedPatient.emergencyPhone || '—' }}</span>
+              </div>
+              <div class="ptnt-info-item">
+                <label>Relation</label>
+                <span>{{ selectedPatient.emergencyRelation || '—' }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="ptnt-section">
+            <div class="ptnt-section__header">
+              <h4>Record</h4>
+              <p>System metadata</p>
+            </div>
+            <div class="ptnt-info-grid">
+              <div class="ptnt-info-item ptnt-info-item--full">
+                <label>Patient ID</label>
+                <span class="ptnt-info-item__mono">{{ selectedPatient.id }}</span>
+              </div>
+              <div class="ptnt-info-item">
+                <label>Created</label>
+                <span>{{ selectedPatient.createdAt | date: 'dd MMM yyyy, HH:mm' }}</span>
+              </div>
+              <div class="ptnt-info-item">
+                <label>Updated</label>
+                <span>{{ selectedPatient.updatedAt | date: 'dd MMM yyyy, HH:mm' }}</span>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Chronic Diseases -->
+        <div class="ptnt-chronic">
+          <div class="ptnt-chronic__header">
+            <div>
+              <h4>Chronic Diseases</h4>
+              <p>Ongoing conditions</p>
+            </div>
+            <div class="ptnt-chronic__header-actions">
+              <span class="ptnt-chronic__count">{{ selectedPatientChronicDiseases.length }} records</span>
+              <button type="button" class="secondary-button" (click)="toggleAddChronicDisease()">
+                {{ isAddingChronicDisease ? 'Cancel' : '+ Add disease' }}
+              </button>
+            </div>
+          </div>
+
+          @if (isAddingChronicDisease) {
+            <div class="ptnt-chronic__add-form">
+              <label>
+                <span>Disease name</span>
+                <input type="text" [(ngModel)]="addChronicDiseaseForm.diseaseName" name="addDiseaseName" />
+              </label>
+              <label>
+                <span>Description</span>
+                <input type="text" [(ngModel)]="addChronicDiseaseForm.diseaseDescription" name="addDiseaseDescription" />
+              </label>
+              @if (addChronicDiseaseError) {
+                <div class="form-error">{{ addChronicDiseaseError }}</div>
+              }
+              <div class="ptnt-chronic__add-actions">
+                <button type="button" class="secondary-button" (click)="toggleAddChronicDisease()">Cancel</button>
+                <button type="button" class="feature-page__action" [disabled]="isCreatingChronicDisease" (click)="submitAddChronicDisease()">
+                  {{ isCreatingChronicDisease ? 'Adding...' : 'Add Disease' }}
+                </button>
+              </div>
+            </div>
+          }
 
           @if (isDetailsChronicLoading) {
-            <div class="details-chronic__state">Loading chronic diseases...</div>
+            <div class="ptnt-chronic__state">Loading chronic diseases...</div>
           } @else if (detailsChronicError) {
-            <div class="details-chronic__state details-chronic__state--error">{{ detailsChronicError }}</div>
-          } @else if (selectedPatientChronicDiseases.length === 0) {
-            <div class="details-chronic__state">No chronic diseases recorded for this patient.</div>
+            <div class="ptnt-chronic__state ptnt-chronic__state--error">{{ detailsChronicError }}</div>
+          } @else if (selectedPatientChronicDiseases.length === 0 && !isAddingChronicDisease) {
+            <div class="ptnt-chronic__state">No chronic diseases recorded for this patient.</div>
           } @else {
-            <ul class="details-chronic__list">
+            <ul class="ptnt-chronic__list">
               @for (disease of selectedPatientChronicDiseases; track disease.id) {
-                <li class="details-chronic__item">
-                  <div class="details-chronic__name">{{ disease.diseaseName }}</div>
-                  <p>{{ disease.diseaseDescription || 'No description provided.' }}</p>
+                <li class="ptnt-chronic__item">
+                  @if (editingChronicDiseaseId === disease.id) {
+                    <div class="ptnt-chronic__edit-form">
+                      <label>
+                        <span>Disease name</span>
+                        <input type="text" [(ngModel)]="editChronicDiseaseForm.diseaseName" name="editDiseaseName" />
+                      </label>
+                      <label>
+                        <span>Description</span>
+                        <input type="text" [(ngModel)]="editChronicDiseaseForm.diseaseDescription" name="editDiseaseDescription" />
+                      </label>
+                      @if (chronicDiseaseEditError) {
+                        <div class="form-error">{{ chronicDiseaseEditError }}</div>
+                      }
+                      <div class="ptnt-chronic__edit-actions">
+                        <button type="button" class="secondary-button" (click)="cancelEditChronicDisease()">Cancel</button>
+                        <button type="button" class="feature-page__action" [disabled]="isUpdatingChronicDisease" (click)="saveEditChronicDisease()">
+                          {{ isUpdatingChronicDisease ? 'Saving...' : 'Save' }}
+                        </button>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="ptnt-chronic__item-top">
+                      <span class="ptnt-chronic__name">{{ disease.diseaseName }}</span>
+                      <div class="ptnt-chronic__item-actions">
+                        @if (deletingChronicDiseaseId === disease.id) {
+                          <span class="ptnt-inline-confirm">
+                            <span>Delete?</span>
+                            <button type="button" class="danger-button" (click)="deleteChronicDisease(disease.id)">Yes, delete</button>
+                            <button type="button" class="secondary-button" (click)="cancelDeleteChronicDisease()">Cancel</button>
+                          </span>
+                        } @else {
+                          <button type="button" class="icon-button" (click)="openEditChronicDisease(disease)">Edit</button>
+                          <button type="button" class="danger-button" (click)="confirmDeleteChronicDisease(disease.id)">Delete</button>
+                        }
+                      </div>
+                    </div>
+                    <p>{{ disease.diseaseDescription || 'No description provided.' }}</p>
+                  }
                 </li>
               }
             </ul>
           }
-        </section>
+        </div>
+
+        <footer class="ptnt-dialog__footer">
+          <button type="button" class="secondary-button" (click)="closeDetailsDialog()">Close</button>
+          @if (showDeletePatientConfirm) {
+            <span class="ptnt-inline-confirm">
+              <span>Delete this patient permanently?</span>
+              @if (deletePatientError) { <span class="ptnt-inline-confirm__error">{{ deletePatientError }}</span> }
+              <button type="button" class="danger-button" [disabled]="isDeletingPatient" (click)="confirmDeletePatient()">
+                {{ isDeletingPatient ? 'Deleting...' : 'Yes, delete' }}
+              </button>
+              <button type="button" class="secondary-button" [disabled]="isDeletingPatient" (click)="cancelDeletePatient()">Cancel</button>
+            </span>
+          } @else {
+            <button type="button" class="feature-page__action" (click)="openEditPatientDialog()">Edit Patient</button>
+            <button type="button" class="danger-button" (click)="showDeletePatient()">Delete Patient</button>
+          }
+        </footer>
+
+      </article>
+    </div>
+  }  @if (isEditPatientDialogOpen && selectedPatient) {
+    <div class="dialog-overlay" (click)="closeEditPatientDialog()">
+      <section class="dialog dialog--large" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Patients</p>
+            <h3>Edit patient</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeEditPatientDialog()" aria-label="Close">X</button>
+        </header>
+
+        <form class="dialog__form dialog__form--two-columns" (ngSubmit)="updatePatient()">
+          <label>
+            <span>Card number</span>
+            <input type="text" [(ngModel)]="editPatientForm.cardNo" name="editCardNo" required />
+          </label>
+
+          <label>
+            <span>Full name</span>
+            <input type="text" [(ngModel)]="editPatientForm.fullname" name="editFullname" required />
+          </label>
+
+          <label>
+            <span>Birth date</span>
+            <input type="date" [(ngModel)]="editPatientForm.birthDate" name="editBirthDate" />
+          </label>
+
+          <label>
+            <span>Gender</span>
+            <select [(ngModel)]="editPatientForm.gender" name="editGender">
+              <option value="MALE">MALE</option>
+              <option value="FEMALE">FEMALE</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Marital status</span>
+            <select [(ngModel)]="editPatientForm.maritalStatus" name="editMaritalStatus">
+              <option value="SINGLE">SINGLE</option>
+              <option value="MARRIED">MARRIED</option>
+              <option value="DIVORCED">DIVORCED</option>
+              <option value="WIDOWED">WIDOWED</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Emergency contact</span>
+            <input type="text" [(ngModel)]="editPatientForm.emergencyContact" name="editEmergencyContact" />
+          </label>
+
+          <label>
+            <span>Emergency phone</span>
+            <input type="text" [(ngModel)]="editPatientForm.emergencyPhone" name="editEmergencyPhone" />
+          </label>
+
+          <label>
+            <span>Emergency relation</span>
+            <input type="text" [(ngModel)]="editPatientForm.emergencyRelation" name="editEmergencyRelation" />
+          </label>
+
+          <label class="dialog__field--full">
+            <span>Allergies</span>
+            <input type="text" [(ngModel)]="editPatientForm.allergies" name="editAllergies" />
+          </label>
+
+          @if (editPatientError) {
+            <div class="dialog__field--full form-error">{{ editPatientError }}</div>
+          }
+
+          <div class="dialog__actions dialog__actions--full">
+            <button type="button" class="secondary-button" (click)="closeEditPatientDialog()">Cancel</button>
+            <button type="submit" class="feature-page__action" [disabled]="isUpdatingPatient">
+              {{ isUpdatingPatient ? 'Saving...' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
       </section>
     </div>
   }

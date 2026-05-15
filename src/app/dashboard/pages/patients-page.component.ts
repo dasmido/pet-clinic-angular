@@ -1,8 +1,8 @@
-import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, HostListener, OnInit, ChangeDetectorRef, NgZone, Inject, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PatientApiService, Patient, CreatePatientPayload } from '../../services/patient-api.service';
-import { ChronicDiseaseApiService, ChronicDiseaseRecord } from '../../services/chronic-disease-api.service';
+import { PatientApiService, Patient, CreatePatientPayload, UpdatePatientPayload } from '../../services/patient-api.service';
+import { ChronicDiseaseApiService, ChronicDiseaseRecord, UpdateChronicDiseasePayload } from '../../services/chronic-disease-api.service';
 
 type MaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
 type Gender = 'MALE' | 'FEMALE';
@@ -33,6 +33,30 @@ interface NewPatientChronicDiseaseForm {
   diseaseDescription: string;
 }
 
+interface EditPatientForm {
+  id: string;
+  cardNo: string;
+  fullname: string;
+  birthDate: string;
+  maritalStatus: MaritalStatus;
+  gender: Gender;
+  emergencyContact: string;
+  emergencyPhone: string;
+  emergencyRelation: string;
+  allergies: string;
+}
+
+interface EditChronicDiseaseForm {
+  id: string;
+  diseaseName: string;
+  diseaseDescription: string;
+}
+
+interface AddChronicDiseaseForm {
+  diseaseName: string;
+  diseaseDescription: string;
+}
+
 @Component({
   selector: 'app-patients-page',
   standalone: true,
@@ -45,7 +69,8 @@ export class PatientsPageComponent implements OnInit {
     private patientApiService: PatientApiService,
     private chronicDiseaseApiService: ChronicDiseaseApiService,
     private cdr: ChangeDetectorRef,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    @Inject(PLATFORM_ID) private platformId: object
   ) {}
 
   readonly metrics = [
@@ -78,18 +103,51 @@ export class PatientsPageComponent implements OnInit {
   isAdvancedSearchOpen = false;
   isDetailsDialogOpen = false;
   isAddDialogOpen = false;
+  isEditPatientDialogOpen = false;
 
   selectedPatient: PatientRecord | null = null;
   selectedPatientChronicDiseases: ChronicDiseaseRecord[] = [];
   isDetailsChronicLoading = false;
   detailsChronicError = '';
 
+  // Patient delete
+  showDeletePatientConfirm = false;
+  isDeletingPatient = false;
+  deletePatientError = '';
+
+  // Patient edit
+  editPatientForm: EditPatientForm = this.getDefaultEditPatientForm();
+  isUpdatingPatient = false;
+  editPatientError = '';
+
+  // Chronic disease inline edit
+  editingChronicDiseaseId: string | null = null;
+  editChronicDiseaseForm: EditChronicDiseaseForm = { id: '', diseaseName: '', diseaseDescription: '' };
+  isUpdatingChronicDisease = false;
+  chronicDiseaseEditError = '';
+
+  // Chronic disease delete
+  deletingChronicDiseaseId: string | null = null;
+
+  // Add chronic disease
+  isAddingChronicDisease = false;
+  addChronicDiseaseForm: AddChronicDiseaseForm = { diseaseName: '', diseaseDescription: '' };
+  isCreatingChronicDisease = false;
+  addChronicDiseaseError = '';
+
   ngOnInit(): void {
-    this.loadPatients();
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadPatients();
+    }
   }
 
   @HostListener('document:keydown.escape')
   onEscKey(): void {
+    if (this.isEditPatientDialogOpen) {
+      this.closeEditPatientDialog();
+      return;
+    }
+
     if (this.isAddDialogOpen) {
       this.closeAddDialog();
       return;
@@ -188,6 +246,228 @@ export class PatientsPageComponent implements OnInit {
     this.selectedPatientChronicDiseases = [];
     this.isDetailsChronicLoading = false;
     this.detailsChronicError = '';
+    this.showDeletePatientConfirm = false;
+    this.deletePatientError = '';
+    this.editingChronicDiseaseId = null;
+    this.deletingChronicDiseaseId = null;
+    this.isAddingChronicDisease = false;
+  }
+
+  openEditPatientDialog(): void {
+    if (!this.selectedPatient) return;
+    this.editPatientForm = {
+      id: this.selectedPatient.id,
+      cardNo: this.selectedPatient.cardNo,
+      fullname: this.selectedPatient.fullname,
+      birthDate: this.selectedPatient.birthDate,
+      maritalStatus: this.selectedPatient.maritalStatus as MaritalStatus,
+      gender: this.selectedPatient.gender as Gender,
+      emergencyContact: this.selectedPatient.emergencyContact,
+      emergencyPhone: this.selectedPatient.emergencyPhone,
+      emergencyRelation: this.selectedPatient.emergencyRelation,
+      allergies: this.selectedPatient.allergies,
+    };
+    this.editPatientError = '';
+    this.isDetailsDialogOpen = false;
+    this.isEditPatientDialogOpen = true;
+  }
+
+  closeEditPatientDialog(): void {
+    if (this.isUpdatingPatient) return;
+    this.isEditPatientDialogOpen = false;
+    if (this.selectedPatient) {
+      this.isDetailsDialogOpen = true;
+    }
+  }
+
+  updatePatient(): void {
+    if (this.isUpdatingPatient || !this.selectedPatient) return;
+    const payload: UpdatePatientPayload = {
+      id: this.editPatientForm.id,
+      cardNo: this.editPatientForm.cardNo.trim(),
+      fullname: this.editPatientForm.fullname.trim(),
+      birthDate: this.editPatientForm.birthDate,
+      maritalStatus: this.editPatientForm.maritalStatus,
+      gender: this.editPatientForm.gender,
+      emergencyContact: this.editPatientForm.emergencyContact.trim(),
+      emergencyPhone: this.editPatientForm.emergencyPhone.trim(),
+      emergencyRelation: this.editPatientForm.emergencyRelation.trim(),
+      allergies: this.editPatientForm.allergies.trim(),
+    };
+    if (!payload.cardNo || !payload.fullname) {
+      this.editPatientError = 'Full name and card number are required.';
+      return;
+    }
+    this.isUpdatingPatient = true;
+    this.editPatientError = '';
+    this.patientApiService.updatePatient(payload).subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.isUpdatingPatient = false;
+          this.isEditPatientDialogOpen = false;
+          this.loadPatients();
+          if (this.selectedPatient) {
+            this.isDetailsDialogOpen = true;
+          }
+          this.cdr.markForCheck();
+        });
+      },
+      error: (error: unknown) => {
+        this.ngZone.run(() => {
+          console.error('Error updating patient:', error);
+          this.isUpdatingPatient = false;
+          this.editPatientError = 'Failed to update patient. Please try again.';
+          this.cdr.markForCheck();
+        });
+      },
+    });
+  }
+
+  showDeletePatient(): void {
+    this.showDeletePatientConfirm = true;
+    this.deletePatientError = '';
+  }
+
+  cancelDeletePatient(): void {
+    this.showDeletePatientConfirm = false;
+    this.deletePatientError = '';
+  }
+
+  confirmDeletePatient(): void {
+    if (!this.selectedPatient || this.isDeletingPatient) return;
+    this.isDeletingPatient = true;
+    this.deletePatientError = '';
+    this.patientApiService.deletePatient(this.selectedPatient.id).subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.isDeletingPatient = false;
+          this.closeDetailsDialog();
+          this.loadPatients();
+          this.cdr.markForCheck();
+        });
+      },
+      error: (error: unknown) => {
+        this.ngZone.run(() => {
+          console.error('Error deleting patient:', error);
+          this.isDeletingPatient = false;
+          this.deletePatientError = 'Failed to delete patient. Please try again.';
+          this.cdr.markForCheck();
+        });
+      },
+    });
+  }
+
+  openEditChronicDisease(disease: ChronicDiseaseRecord): void {
+    this.editingChronicDiseaseId = disease.id;
+    this.editChronicDiseaseForm = {
+      id: disease.id,
+      diseaseName: disease.diseaseName,
+      diseaseDescription: disease.diseaseDescription,
+    };
+    this.chronicDiseaseEditError = '';
+  }
+
+  cancelEditChronicDisease(): void {
+    this.editingChronicDiseaseId = null;
+    this.chronicDiseaseEditError = '';
+  }
+
+  saveEditChronicDisease(): void {
+    if (!this.editingChronicDiseaseId || this.isUpdatingChronicDisease) return;
+    const payload: UpdateChronicDiseasePayload = {
+      id: this.editChronicDiseaseForm.id,
+      diseaseName: this.editChronicDiseaseForm.diseaseName.trim(),
+      diseaseDescription: this.editChronicDiseaseForm.diseaseDescription.trim(),
+    };
+    if (!payload.diseaseName) {
+      this.chronicDiseaseEditError = 'Disease name is required.';
+      return;
+    }
+    this.isUpdatingChronicDisease = true;
+    this.chronicDiseaseApiService.updateChronicDisease(payload).subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.isUpdatingChronicDisease = false;
+          this.editingChronicDiseaseId = null;
+          if (this.selectedPatient) this.loadPatientChronicDiseases(this.selectedPatient.id);
+          this.cdr.markForCheck();
+        });
+      },
+      error: (error: unknown) => {
+        this.ngZone.run(() => {
+          console.error('Error updating chronic disease:', error);
+          this.isUpdatingChronicDisease = false;
+          this.chronicDiseaseEditError = 'Failed to update. Please try again.';
+          this.cdr.markForCheck();
+        });
+      },
+    });
+  }
+
+  confirmDeleteChronicDisease(id: string): void {
+    this.deletingChronicDiseaseId = id;
+  }
+
+  cancelDeleteChronicDisease(): void {
+    this.deletingChronicDiseaseId = null;
+  }
+
+  deleteChronicDisease(id: string): void {
+    this.chronicDiseaseApiService.deleteChronicDisease(id).subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.deletingChronicDiseaseId = null;
+          if (this.selectedPatient) this.loadPatientChronicDiseases(this.selectedPatient.id);
+          this.cdr.markForCheck();
+        });
+      },
+      error: (error: unknown) => {
+        this.ngZone.run(() => {
+          console.error('Error deleting chronic disease:', error);
+          this.cdr.markForCheck();
+        });
+      },
+    });
+  }
+
+  toggleAddChronicDisease(): void {
+    this.isAddingChronicDisease = !this.isAddingChronicDisease;
+    this.addChronicDiseaseForm = { diseaseName: '', diseaseDescription: '' };
+    this.addChronicDiseaseError = '';
+  }
+
+  submitAddChronicDisease(): void {
+    if (!this.selectedPatient || this.isCreatingChronicDisease) return;
+    const name = this.addChronicDiseaseForm.diseaseName.trim();
+    if (!name) {
+      this.addChronicDiseaseError = 'Disease name is required.';
+      return;
+    }
+    this.isCreatingChronicDisease = true;
+    this.addChronicDiseaseError = '';
+    this.chronicDiseaseApiService.createChronicDisease({
+      patientId: this.selectedPatient.id,
+      diseaseName: name,
+      diseaseDescription: this.addChronicDiseaseForm.diseaseDescription.trim(),
+    }).subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.isCreatingChronicDisease = false;
+          this.isAddingChronicDisease = false;
+          this.addChronicDiseaseForm = { diseaseName: '', diseaseDescription: '' };
+          if (this.selectedPatient) this.loadPatientChronicDiseases(this.selectedPatient.id);
+          this.cdr.markForCheck();
+        });
+      },
+      error: (error: unknown) => {
+        this.ngZone.run(() => {
+          console.error('Error adding chronic disease:', error);
+          this.isCreatingChronicDisease = false;
+          this.addChronicDiseaseError = 'Failed to add disease. Please try again.';
+          this.cdr.markForCheck();
+        });
+      },
+    });
   }
 
   private loadPatientChronicDiseases(patientId: string): void {
@@ -318,6 +598,21 @@ export class PatientsPageComponent implements OnInit {
     }
 
     return value.toLowerCase().includes(query.trim().toLowerCase());
+  }
+
+  private getDefaultEditPatientForm(): EditPatientForm {
+    return {
+      id: '',
+      cardNo: '',
+      fullname: '',
+      birthDate: '',
+      maritalStatus: 'SINGLE',
+      gender: 'MALE',
+      emergencyContact: '',
+      emergencyPhone: '',
+      emergencyRelation: '',
+      allergies: '',
+    };
   }
 
   private getDefaultNewPatientForm(): NewPatientForm {

@@ -22,6 +22,12 @@ export interface DeleteChronicDiseasePayload {
   id: string;
 }
 
+export interface UpdateChronicDiseasePayload {
+  id: string;
+  diseaseName?: string;
+  diseaseDescription?: string;
+}
+
 export interface ChronicDiseasesListResponse {
   data: {
     data: ChronicDiseaseRecord[];
@@ -103,6 +109,14 @@ export class ChronicDiseaseApiService {
         body: { id },
         headers: this.getAuthHeaders()
       }
+    );
+  }
+
+  updateChronicDisease(payload: UpdateChronicDiseasePayload): Observable<unknown> {
+    return this.http.patch(
+      `${this.API_BASE}/patients/chronic-diseases/update`,
+      payload,
+      { headers: this.getAuthHeaders() }
     );
   }
 }

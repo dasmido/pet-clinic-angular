@@ -23,6 +23,19 @@ export interface ChronicDisease {
   diseaseDescription: string;
 }
 
+export interface UpdatePatientPayload {
+  id: string;
+  cardNo?: string;
+  fullname?: string;
+  birthDate?: string;
+  maritalStatus?: string;
+  gender?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  emergencyRelation?: string;
+  allergies?: string;
+}
+
 export interface CreatePatientPayload {
   cardNo: string;
   fullname: string;
@@ -91,6 +104,24 @@ export class PatientApiService {
       `${this.API_BASE}/patients/create`,
       payload,
       { headers: this.getAuthHeaders() }
+    );
+  }
+
+  updatePatient(payload: UpdatePatientPayload): Observable<unknown> {
+    return this.http.patch(
+      `${this.API_BASE}/patients/update`,
+      payload,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  deletePatient(id: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.API_BASE}/patients/delete`,
+      {
+        body: { id },
+        headers: this.getAuthHeaders(),
+      }
     );
   }
 }
