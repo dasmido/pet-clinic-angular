@@ -2,41 +2,379 @@
   <header class="feature-page__hero">
     <div>
       <p class="feature-page__eyebrow">Reservations</p>
-      <h2>Appointment board</h2>
-      <p>Schedule consults, follow-ups, and walk-in visits with clear daily visibility.</p>
+      <h2>Appointments Board</h2>
+      <p>Create, update, and track appointment stages with complete payment visibility.</p>
     </div>
-    <button type="button" class="feature-page__action">New reservation</button>
+    <button type="button" class="feature-page__action" (click)="openAddDialog()">Add reservation</button>
   </header>
 
-  <section class="feature-page__metrics">
-    @for (metric of metrics; track metric.label) {
-      <article class="feature-page__metric">
-        <span>{{ metric.label }}</span>
-        <strong>{{ metric.value }}</strong>
-        <small>{{ metric.delta }}</small>
-      </article>
-    }
-  </section>
-
   <article class="feature-page__panel">
-    <div class="feature-page__panel-header">
-      <div>
-        <p>Reservations</p>
-        <h3>Today schedule</h3>
+    <div class="patients-toolbar">
+      <div class="patients-toolbar__search">
+        <label for="reservation-quick-search">Quick search</label>
+        <input
+          id="reservation-quick-search"
+          type="text"
+          placeholder="Patient, doctor, stage, payment"
+          [(ngModel)]="quickSearch"
+        />
       </div>
-      <span>Balance doctor capacity with high-priority bookings.</span>
+
+      <div class="patients-toolbar__actions">
+        <button type="button" class="secondary-button" (click)="openAdvancedSearchDialog()">
+          Advanced search
+        </button>
+        <button type="button" class="secondary-button" (click)="openAddDialog()">Add reservation</button>
+      </div>
     </div>
 
-    <div class="feature-page__list">
-      @for (record of records; track record.heading) {
-        <div class="feature-page__item">
-          <div>
-            <strong>{{ record.heading }}</strong>
-            <span>{{ record.subheading }}</span>
-          </div>
-          <small>{{ record.status }}</small>
-        </div>
+    <div class="patients-table-wrapper">
+      @if (isLoading) {
+        <div class="loading-state">Loading reservations...</div>
+      } @else if (errorMessage) {
+        <div class="error-state">{{ errorMessage }}</div>
+      } @else {
+        <table class="reservations-table">
+          <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Date</th>
+              <th>Stage</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngIf="filteredAppointments.length === 0">
+              <td colspan="6" class="reservations-table__empty">No reservations found for the selected filters.</td>
+            </tr>
+            <tr *ngFor="let appointment of filteredAppointments; trackBy: trackById">
+              <td>{{ getAppointmentPatientLabel(appointment) }}</td>
+              <td>{{ getAppointmentDoctorLabel(appointment) }}</td>
+              <td>{{ appointment.appointmentDate | date: 'dd MMM yyyy' }}</td>
+              <td>{{ getStageDisplay(appointment.stage) }}</td>
+              <td class="actions-cell">
+                <button
+                  type="button"
+                  class="icon-button details-button"
+                  (click)="openDetailsDialog(appointment)"
+                >
+                  Details
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       }
     </div>
+
+    <div class="pagination-controls">
+      <button type="button" class="secondary-button" (click)="previousPage()" [disabled]="currentPage <= 1 || isLoading">
+        ← Previous
+      </button>
+      <span class="pagination-info">
+        Page {{ currentPage }} of {{ totalPages || 1 }} ({{ totalAppointments }} total reservations)
+      </span>
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="nextPage()"
+        [disabled]="currentPage >= totalPages || isLoading || totalPages === 0"
+      >
+        Next →
+      </button>
+    </div>
   </article>
+
+  @if (isAdvancedSearchOpen) {
+    <div class="dialog-overlay" (click)="closeAdvancedSearchDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Reservations</p>
+            <h3>Advanced search</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeAdvancedSearchDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form" (ngSubmit)="applyAdvancedSearch()">
+          <label>
+            <span>Patient id</span>
+            <input type="text" [(ngModel)]="searchCriteria.patientId" name="searchPatientId" />
+          </label>
+
+          <label>
+            <span>Doctor id</span>
+            <input type="text" [(ngModel)]="searchCriteria.doctorId" name="searchDoctorId" />
+          </label>
+
+          <label>
+            <span>Stage</span>
+            <select [(ngModel)]="searchCriteria.stage" name="searchStage">
+              <option value="">Any</option>
+              @for (stage of availableStages; track stage) {
+                <option [value]="stage">{{ stage }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Payment type</span>
+            <select [(ngModel)]="searchCriteria.paymentType" name="searchPaymentType">
+              <option value="">Any</option>
+              @for (type of availablePaymentTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Currency</span>
+            <select [(ngModel)]="searchCriteria.currency" name="searchCurrency">
+              <option value="">Any</option>
+              @for (currency of availableCurrencies; track currency) {
+                <option [value]="currency">{{ currency }}</option>
+              }
+            </select>
+          </label>
+
+          <div class="dialog__actions">
+            <button type="button" class="secondary-button" (click)="clearAdvancedSearch()">Clear filters</button>
+            <button type="submit" class="feature-page__action">Apply search</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (isAddDialogOpen) {
+    <div class="dialog-overlay" (click)="closeAddDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Reservations</p>
+            <h3>Add reservation</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeAddDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form" (ngSubmit)="createReservation()">
+          <label>
+            <span>Patient</span>
+            <select [(ngModel)]="newReservationForm.patientId" name="newPatientId" required [disabled]="isLookupLoading">
+              <option value="">Select patient</option>
+              @for (patient of patients; track patient.id) {
+                <option [value]="patient.id">{{ patient.fullname }} ({{ patient.cardNo }})</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Doctor</span>
+            <select
+              [(ngModel)]="newReservationForm.doctorId"
+              name="newDoctorId"
+              required
+              [disabled]="isLookupLoading"
+              (ngModelChange)="onDoctorSelectionChange()"
+            >
+              <option value="">Select doctor</option>
+              @for (doctor of doctors; track doctor.id) {
+                <option [value]="doctor.id">{{ doctor.fullname }} ({{ doctor.username }})</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Doctor availability</span>
+            <select
+              [(ngModel)]="newReservationForm.doctorsTimeReservationId"
+              name="newDoctorsTimeReservationId"
+              required
+              [disabled]="isLookupLoading || !newReservationForm.doctorId"
+            >
+              <option value="">Select doctor availability</option>
+              @for (availability of filteredDoctorAvailabilitiesForSelectedDoctor; track availability.id) {
+                <option [value]="availability.id">
+                  {{ availability.reservationDays.join(', ') }} | {{ availability.startTime.slice(0, 5) }} - {{ availability.endTime.slice(0, 5) }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Appointment date</span>
+            <input type="date" [(ngModel)]="newReservationForm.appointmentDate" name="newAppointmentDate" required />
+          </label>
+
+          <label>
+            <span>Stage</span>
+            <select [(ngModel)]="newReservationForm.stage" name="newStage" required>
+              @for (stage of availableStages; track stage) {
+                <option [value]="stage">{{ stage }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Payment</span>
+            <input type="number" min="0" step="0.01" [(ngModel)]="newReservationForm.payment" name="newPayment" required />
+          </label>
+
+          <label>
+            <span>Payment type</span>
+            <select [(ngModel)]="newReservationForm.paymentType" name="newPaymentType" required>
+              @for (type of availablePaymentTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Currency</span>
+            <select [(ngModel)]="newReservationForm.currency" name="newCurrency" required>
+              @for (currency of availableCurrencies; track currency) {
+                <option [value]="currency">{{ currency }}</option>
+              }
+            </select>
+          </label>
+
+          @if (createErrorMessage) {
+            <div class="form-error">
+              {{ createErrorMessage }}
+            </div>
+          }
+
+          <div class="dialog__actions">
+            <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
+            <button type="submit" class="feature-page__action" [disabled]="isCreating">
+              {{ isCreating ? 'Creating...' : 'Create reservation' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (isEditDialogOpen && selectedAppointment) {
+    <div class="dialog-overlay" (click)="closeEditDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Reservations</p>
+            <h3>Edit reservation</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeEditDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <form class="dialog__form" (ngSubmit)="updateReservation()">
+          <label>
+            <span>Appointment id</span>
+            <input type="text" [ngModel]="editReservationForm.id" name="editId" disabled />
+          </label>
+
+          <label>
+            <span>Stage</span>
+            <select [(ngModel)]="editReservationForm.stage" name="editStage" required>
+              @for (stage of availableStages; track stage) {
+                <option [value]="stage">{{ stage }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Doctor treatment</span>
+            <input type="text" [(ngModel)]="editReservationForm.doctorTreatment" name="editDoctorTreatment" />
+          </label>
+
+          <label>
+            <span>Reception note</span>
+            <input type="text" [(ngModel)]="editReservationForm.receptionNote" name="editReceptionNote" />
+          </label>
+
+          @if (updateErrorMessage) {
+            <div class="form-error">
+              {{ updateErrorMessage }}
+            </div>
+          }
+
+          <div class="dialog__actions">
+            <button type="button" class="secondary-button" (click)="closeEditDialog()">Cancel</button>
+            <button type="submit" class="feature-page__action" [disabled]="isUpdating">
+              {{ isUpdating ? 'Saving...' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (isDeleteDialogOpen) {
+    <div class="dialog-overlay" (click)="closeDeleteDialog()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <div>
+            <p>Reservations</p>
+            <h3>Delete reservation</h3>
+          </div>
+          <button type="button" class="icon-close" (click)="closeDeleteDialog()" aria-label="Close">
+            X
+          </button>
+        </header>
+
+        <p class="confirm-delete-message">{{ deleteDialogMessage }}</p>
+
+        <div class="dialog__actions">
+          <button type="button" class="secondary-button" [disabled]="isDeleting" (click)="closeDeleteDialog()">
+            Cancel
+          </button>
+          <button type="button" class="danger-button" [disabled]="isDeleting" (click)="confirmDeleteReservation()">
+            {{ isDeleting ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+
+  @if (isDetailsDialogOpen) {
+    <div class="dialog-overlay" (click)="closeDetailsDialog()">
+      <section class="dialog dialog--large" (click)="$event.stopPropagation()">
+        <header class="dialog__header">
+          <h3>Appointment Details</h3>
+          <button type="button" class="icon-close" (click)="closeDetailsDialog()">X</button>
+        </header>
+        <div class="dialog__content">
+          <p><strong>Appointment ID:</strong> {{ selectedAppointment?.id }}</p>
+          <p><strong>Patient:</strong> {{ selectedAppointment?.patient?.fullname }}</p>
+          <p><strong>Gender:</strong> {{ selectedAppointment?.patient?.gender }}</p>
+          <p><strong>Birth Date:</strong> {{ selectedAppointment?.patient?.birthDate | date: 'dd MMM yyyy' }}</p>
+          <p><strong>Doctor:</strong> {{ selectedAppointment?.doctor?.fullname }}</p>
+          <p><strong>Date:</strong> {{ selectedAppointment?.appointmentDate | date: 'dd MMM yyyy' }}</p>
+          <p><strong>Stage:</strong> <span class="stage-tag">{{ getStageDisplay(selectedAppointment?.stage) }}</span></p>
+          <p><strong>Reception Note:</strong> {{ selectedAppointment?.receptionNote || 'N/A' }}</p>
+          <p><strong>Blood Pressure (BP):</strong> {{ selectedAppointment?.bp || 'N/A' }}</p>
+          <p><strong>Chief Complaint:</strong> {{ selectedAppointment?.chiefComplaint || 'N/A' }}</p>
+          <p><strong>Doctor Treatment:</strong> {{ selectedAppointment?.doctorTreatment || 'N/A' }}</p>
+          <p><strong>ECG:</strong> {{ selectedAppointment?.ecg || 'N/A' }}</p>
+          <p><strong>End Time:</strong> {{ selectedAppointment?.endTime || 'N/A' }}</p>
+          <p><strong>Lab Result:</strong> {{ selectedAppointment?.labResult || 'N/A' }}</p>
+          <p><strong>Others:</strong> {{ selectedAppointment?.others || 'N/A' }}</p>
+          <p><strong>Pulse:</strong> {{ selectedAppointment?.pulse || 'N/A' }}</p>
+          <p><strong>Respiratory Rate (RR):</strong> {{ selectedAppointment?.rr || 'N/A' }}</p>
+          <p><strong>Temperature:</strong> {{ selectedAppointment?.temperature || 'N/A' }}</p>
+          <p><strong>Created At:</strong> {{ selectedAppointment?.createdAt | date: 'dd MMM yyyy, HH:mm' }}</p>
+        </div>
+        <footer class="dialog__actions">
+          <button type="button" class="secondary-button" (click)="closeDetailsDialog()">Close</button>
+        </footer>
+      </section>
+    </div>
+  }
 </section>

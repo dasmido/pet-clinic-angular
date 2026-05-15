@@ -1,0 +1,127 @@
+@import './patients-page.component.css';
+
+.reservations-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1260px;
+}
+
+.reservations-table th,
+.reservations-table td {
+  text-align: left;
+  padding: 13px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.reservations-table th {
+  color: #8ea9d4;
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.reservations-table td {
+  color: #e7f2ff;
+  font-size: 0.94rem;
+}
+
+.reservations-table tbody tr:hover {
+  background: rgba(139, 181, 255, 0.08);
+}
+
+.reservations-table__empty {
+  color: #a8bfdf !important;
+  text-align: center !important;
+  padding: 26px !important;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-button {
+  border-color: rgba(129, 187, 255, 0.3);
+  color: #b7d6ff;
+  background: rgba(108, 172, 255, 0.11);
+}
+
+.edit-button:hover {
+  background: rgba(108, 172, 255, 0.2);
+}
+
+.danger-button {
+  border: 1px solid rgba(255, 138, 151, 0.36);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #ffb5bf;
+  background: rgba(255, 138, 151, 0.1);
+  transition: transform 140ms ease, background-color 140ms ease;
+}
+
+.danger-button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 138, 151, 0.18);
+}
+
+.danger-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.confirm-delete-message {
+  margin: 6px 0 14px;
+  color: #c7d9f4;
+  line-height: 1.5;
+}
+
+:host-context(.theme-light) .reservations-table th {
+  color: #5779a8;
+  background: rgba(113, 152, 205, 0.08);
+}
+
+:host-context(.theme-light) .reservations-table td {
+  color: #23456c;
+}
+
+:host-context(.theme-light) .reservations-table tbody tr:hover {
+  background: rgba(113, 152, 205, 0.14);
+}
+
+:host-context(.theme-light) .edit-button {
+  border-color: rgba(88, 133, 193, 0.34);
+  color: #305a8f;
+  background: rgba(171, 211, 255, 0.48);
+}
+
+:host-context(.theme-light) .danger-button {
+  background: rgba(255, 220, 224, 0.9);
+  border-color: rgba(213, 112, 124, 0.34);
+  color: #9a2f3c;
+}
+
+:host-context(.theme-light) .confirm-delete-message {
+  color: #4f709c;
+}
+
+.dialog--large {
+  width: 80%;
+  max-width: 900px;
+  height: auto;
+  max-height: 90%;
+  overflow-y: auto;
+}
+
+.stage-tag {
+  display: inline-block;
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  color: #fff;
+  background-color: #007bff;
+  font-weight: bold;
+}
